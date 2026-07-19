@@ -1,8 +1,8 @@
 {
-  "name": "TravelMate AI v18 Project Data",
+  "name": "TravelMate AI v18.1 Universal Fix",
   "short_name": "TravelMate AI",
-  "description": "여행별 일정·지갑·비용·준비물·메모를 독립 관리하는 여행 에이전트",
-  "start_url": "./index.html?v=18.0",
+  "description": "여행지 시간·현지언어·예약·도구·일정 업로드를 여행별로 적용하는 범용 여행 에이전트",
+  "start_url": "./index.html?v=18.1",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f4f7f8",

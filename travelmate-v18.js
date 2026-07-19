@@ -9,7 +9,7 @@
   const save=(s,v)=>localStorage.setItem(key(s),JSON.stringify(v));
   const schedule=()=>load("schedule",[]);
   const packing=()=>load("packing",[]);
-  const expenses=()=>{try{return JSON.parse(localStorage.getItem(`travelmate_v17_${trip().id}_expenses`)||"[]")}catch{return[]}};
+  const expenses=()=>{try{return JSON.parse(localStorage.getItem(`${ROOT}_${trip().id}_expenses`)||localStorage.getItem(`travelmate_v17_${trip().id}_expenses`)||"[]")}catch{return[]}};
 
   function renderFilter(){
     const e=document.getElementById("v18ScheduleFilter");if(!e)return;
@@ -49,7 +49,7 @@
   function summary(){
     v18ScheduleCount&&(v18ScheduleCount.textContent=schedule().length);
     const fs=["passport","insurance","flight","hotel","rental","voucher","emergencyContact"];
-    v18WalletCount&&(v18WalletCount.textContent=fs.filter(f=>localStorage.getItem(`travelmate_v17_${trip().id}_${f}`)).length);
+    v18WalletCount&&(v18WalletCount.textContent=fs.filter(f=>localStorage.getItem(`${ROOT}_${trip().id}_${f}`)||localStorage.getItem(`travelmate_v17_${trip().id}_${f}`)).length);
     v18PackingCount&&(v18PackingCount.textContent=packing().length);
     v18ExpenseCount&&(v18ExpenseCount.textContent=expenses().length);
   }
