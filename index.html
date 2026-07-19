@@ -1,0 +1,2873 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#087f8c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TravelMate AI">
+<link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./favicon.ico">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>TravelMate AI 여행 앱 v17.1 Stable Slim</title>
+<style>
+:root {
+ --bg:#f4f7f8;--card:#fff;--text:#17323a;--muted:#697a80;
+ --brand:#087f8c;--brand2:#20a6a0;--line:#dfe9eb;--sand:#fff4dc;
+ --danger:#b42318;--shadow:0 7px 20px rgba(14,48,58,.07);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+ -webkit-text-size-adjust:100%;
+}
+button,input,textarea,select{font:inherit}
+.day-radio{position:absolute;opacity:0;pointer-events:none}
+.app{max-width:760px;margin:0 auto;padding-bottom:96px}
+.hero{
+ background:linear-gradient(145deg,#087f8c,#18a7a1 60%,#6dd3ce);
+ color:#fff;padding:28px 18px 22px;border-radius:0 0 28px 28px;box-shadow:0 12px 30px #087f8c33;
+}
+.hero .eyebrow{font-size:12px;font-weight:800;letter-spacing:1.4px;opacity:.85}
+.hero h1{font-size:28px;margin:5px 0 3px}
+.hero p{margin:0;opacity:.92}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:17px}
+.stat{background:rgba(255,255,255,.17);border:1px solid rgba(255,255,255,.28);border-radius:15px;padding:12px}
+.stat b{display:block;font-size:18px;margin-top:2px}
+main{padding:14px}
+.card,.day-panel{background:var(--card);border:1px solid var(--line);border-radius:19px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.notice{background:var(--sand);border-left:4px solid #e1a026;border-radius:11px;padding:11px 12px;font-size:14px;color:#704b0a}
+h2{font-size:20px;margin:0}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.section-title small{color:var(--muted);font-weight:700}
+.date-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.date-tab{
+ display:block;text-align:center;background:#e8f7f6;color:var(--brand);
+ border:1px solid #c8e9e6;border-radius:12px;padding:12px 4px;
+ font-size:14px;font-weight:850;-webkit-tap-highlight-color:transparent;
+}
+.day-panel{display:none}
+.day-header{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+.day-header p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.day-header span{background:#e6fbf8;color:var(--brand);padding:6px 9px;border-radius:999px;font-size:12px;font-weight:850;white-space:nowrap}
+.timeline{position:relative;padding:2px 0 0 22px}
+.timeline:before{content:"";position:absolute;left:7px;top:10px;bottom:12px;width:2px;background:#d5e5e7}
+.item{position:relative;padding:0 0 19px 14px}
+.item.is-done{opacity:.55}
+.item.is-done .place{text-decoration:line-through}
+.dot{position:absolute;left:-20px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--brand2);box-shadow:0 0 0 4px #e5faf8}
+.time{color:var(--brand);font-size:13px;font-weight:900}
+.place{font-size:17px;font-weight:900;margin:2px 0}
+.note{font-size:14px;color:var(--muted)}
+.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px}
+.btn{border:0;border-radius:10px;padding:8px 10px;text-decoration:none;background:var(--brand);color:#fff;font-weight:850;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.btn.secondary{background:#e7f7f6;color:var(--brand)}
+.btn.ghost{background:#f1f4f5;color:#42565c}
+.done-label{font-size:13px;font-weight:800;color:#526268;display:flex;align-items:center;gap:5px}
+.done-label input{width:19px;height:19px;accent-color:var(--brand)}
+.page{display:none}
+.page.active{display:block}
+.res-card{border:1px solid var(--line);border-radius:16px;padding:13px;margin-bottom:11px;background:#fbfdfd}
+.res-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+.res-head h3{margin:0;font-size:17px}
+.status{background:#e6fbf8;color:var(--brand);border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900}
+.fields{display:grid;grid-template-columns:1fr;gap:9px}
+.field span{display:block;color:var(--muted);font-size:12px;font-weight:800;margin-bottom:4px}
+.field input,.field textarea{
+ width:100%;border:1px solid var(--line);border-radius:11px;padding:11px;background:#fff;color:var(--text);
+}
+.field textarea{min-height:76px;resize:vertical}
+.inline-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.qr-preview{display:none;margin-top:10px;border:1px dashed var(--line);border-radius:12px;padding:10px;background:#fff}
+.qr-preview img{max-width:100%;max-height:280px;display:block;margin:auto;border-radius:8px}
+.contact-grid{display:grid;grid-template-columns:1fr;gap:9px}
+.contact-row{border:1px solid var(--line);border-radius:13px;padding:11px;background:#fff}
+.contact-row b{display:block;margin-bottom:7px}
+.bottom{
+ position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(760px,100%);
+ display:grid;grid-template-columns:repeat(8,1fr);background:rgba(255,255,255,.95);
+ backdrop-filter:blur(12px);border-top:1px solid var(--line);
+ padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:50;
+}
+.bottom button{border:0;background:none;color:#6b777b;font-size:10px;font-weight:850;padding:6px 1px}
+.bottom button span{display:block;font-size:21px}
+.bottom button.active{color:var(--brand)}
+.list-row{display:flex;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}.list-row input[type=text]{flex:1;border:0;background:transparent;min-width:0}.expense-row{display:grid;grid-template-columns:1fr 90px auto;gap:7px;padding:8px 0;border-bottom:1px solid var(--line)}.expense-row input{width:100%;border:1px solid var(--line);border-radius:9px;padding:8px}.big-number{font-size:28px;font-weight:950;color:var(--brand)}.album-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.album-grid img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px}.food-card{border:1px solid var(--line);border-radius:14px;padding:11px;margin-bottom:9px}.footer{text-align:center;color:var(--muted);font-size:12px;padding:12px}
+.home-kpis{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.home-kpi{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fbfdfd}
+.home-kpi small{display:block;color:var(--muted);font-size:12px;font-weight:800}
+.home-kpi b{display:block;font-size:18px;margin-top:4px}
+.next-box{background:linear-gradient(145deg,#edfafa,#f9ffff);border:1px solid #cfeceb;border-radius:15px;padding:13px;margin-top:10px}
+.next-box h3{margin:0 0 4px;font-size:18px}
+
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.kpi{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fbfdfd}
+.kpi small{display:block;color:var(--muted);font-weight:800}
+.kpi b{display:block;font-size:18px;margin-top:3px}
+.copy-msg{font-size:12px;color:var(--brand);font-weight:800;margin-top:6px}
+.next-card{background:linear-gradient(145deg,#edfafa,#f8ffff);border:1px solid #cfeceb;border-radius:16px;padding:13px}
+.next-card h3{margin:0 0 5px;font-size:18px}
+.rental-highlight{border:2px solid #f1c40f;background:#fffdf3}
+.weather-links{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+#day0:checked ~ .app main .panel-0{display:block}
+#day1:checked ~ .app main .panel-1{display:block}
+#day2:checked ~ .app main .panel-2{display:block}
+#day3:checked ~ .app main .panel-3{display:block}
+#day4:checked ~ .app main .panel-4{display:block}
+#day5:checked ~ .app main .panel-5{display:block}
+#day6:checked ~ .app main .panel-6{display:block}
+#day7:checked ~ .app main .panel-7{display:block}
+#day8:checked ~ .app main .panel-8{display:block}
+#day0:checked ~ .app main .date-selector label[for='day0']{background:var(--brand);color:#fff;border-color:var(--brand)}
+#day1:checked ~ .app main .date-selector label[for='day1']{background:var(--brand);color:#fff;border-color:var(--brand)}
+#day2:checked ~ .app main .date-selector label[for='day2']{background:var(--brand);color:#fff;border-color:var(--brand)}
+#day3:checked ~ .app main .date-selector label[for='day3']{background:var(--brand);color:#fff;border-color:var(--brand)}
+#day4:checked ~ .app main .date-selector label[for='day4']{background:var(--brand);color:#fff;border-color:var(--brand)}
+#day5:checked ~ .app main .date-selector label[for='day5']{background:var(--brand);color:#fff;border-color:var(--brand)}
+#day6:checked ~ .app main .date-selector label[for='day6']{background:var(--brand);color:#fff;border-color:var(--brand)}
+#day7:checked ~ .app main .date-selector label[for='day7']{background:var(--brand);color:#fff;border-color:var(--brand)}
+#day8:checked ~ .app main .date-selector label[for='day8']{background:var(--brand);color:#fff;border-color:var(--brand)}
+@media(min-width:640px){
+ .app{padding-left:10px;padding-right:10px}.hero{border-radius:28px}
+ .date-selector{grid-template-columns:repeat(5,1fr)}.fields.two{grid-template-columns:1fr 1fr}
+}
+
+.hidden{display:none!important}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pill{display:inline-block;background:#e6fbf8;color:var(--brand);border-radius:999px;padding:5px 8px;font-size:11px;font-weight:900}
+.title{margin:0}.muted{color:var(--muted)}.mini{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lang-search{display:grid;gap:9px}.category-chips{display:flex;gap:7px;overflow-x:auto;padding:2px 0 5px}
+.category-chips button{white-space:nowrap;border:1px solid var(--line);border-radius:999px;background:#fff;padding:8px 11px;font-weight:850;color:var(--text)}
+.category-chips button.active{background:var(--brand);border-color:var(--brand);color:#fff}
+.phrase-card{border:1px solid var(--line);border-radius:15px;padding:12px;margin-bottom:9px;background:#fff}
+.phrase-ko{font-size:16px;font-weight:900}.phrase-en{font-size:17px;color:var(--brand);margin-top:6px;line-height:1.35}
+.phrase-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.big-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:999}
+.big-overlay.show{display:flex}.big-dialog{width:min(700px,100%);background:#fff;border-radius:22px;padding:24px;text-align:center}
+.big-en{font-size:clamp(28px,8vw,52px);font-weight:950;line-height:1.2}.big-ko{font-size:18px;color:var(--muted);margin-top:14px}
+.check-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+.check-row input[type=text]{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px}
+.food-form{display:grid;gap:9px}.food-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.food-card textarea,.food-card select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px}
+.version-banner{background:#17323a;color:#fff;text-align:center;padding:7px;font-size:12px;font-weight:900}
+@media(max-width:430px){.bottom button span{font-size:18px}.bottom button{font-size:9px}}
+
+
+.interpreter-mode{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.interpreter-panel{border:1px solid var(--line);border-radius:17px;padding:14px;background:#fff;min-height:210px;display:flex;flex-direction:column}
+.interpreter-panel h3{margin:0 0 8px;font-size:16px}
+.interpreter-text{flex:1;white-space:pre-wrap;font-size:19px;line-height:1.45;font-weight:800;padding:10px;border-radius:12px;background:#f7fbfb;min-height:100px}
+.interpreter-panel.english .interpreter-text{color:#116e74}
+.interpreter-panel.korean .interpreter-text{color:#24343a}
+.mic-button{width:100%;border:0;border-radius:16px;padding:16px 12px;font-weight:950;font-size:17px;background:var(--brand);color:#fff}
+.mic-button.listening{background:#d94b4b;animation:pulseMic 1.2s infinite}
+@keyframes pulseMic{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+.interpreter-status{padding:9px 11px;border-radius:12px;background:#eef8f7;font-size:13px;font-weight:850;color:#466267}
+.conversation-log{display:grid;gap:8px}
+.log-item{border:1px solid var(--line);border-radius:13px;padding:10px;background:#fff}
+.log-item .who{font-size:11px;font-weight:950;color:var(--muted);margin-bottom:4px}
+.quick-response-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quick-response-grid button{text-align:left}
+@media(max-width:620px){
+  .interpreter-mode{grid-template-columns:1fr}
+  .interpreter-panel{min-height:180px}
+}
+
+
+.translation-result{margin-top:10px;border:2px solid #b7e2df;border-radius:15px;padding:13px;background:#f4fffd}
+.translation-result .label{font-size:12px;font-weight:950;color:var(--muted);margin-bottom:5px}
+.translation-result .text{font-size:20px;line-height:1.45;font-weight:900;white-space:pre-wrap}
+.translation-result.loading{opacity:.65}
+.translation-error{margin-top:8px;padding:9px 11px;border-radius:10px;background:#fff2f2;color:#a13b3b;font-size:13px;font-weight:800}
+.translation-settings{display:grid;gap:8px}
+.api-light{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:900}
+.api-dot{width:9px;height:9px;border-radius:50%;background:#aaa}
+.api-dot.ok{background:#29a36a}.api-dot.bad{background:#d94b4b}
+
+
+.gpt-badge{display:inline-flex;align-items:center;gap:5px;background:#ecf7ff;color:#315f86;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:950}
+.ai-note{border-left:4px solid var(--brand);padding:9px 11px;background:#f5fbfb;border-radius:10px;font-size:13px}
+
+
+.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.chip{border:1px solid #dce8ea;background:#fff;border-radius:999px;padding:10px;font-weight:800}
+.suggestion-list{display:grid;gap:8px;margin-top:8px}
+.suggestion-item{background:#f7fafb;border-radius:12px;padding:10px 12px;border:1px solid #e5edef}
+.translation-result{white-space:pre-wrap;line-height:1.55}
+textarea{width:100%;box-sizing:border-box;border:1px solid #d8e3e5;border-radius:12px;padding:12px;font:inherit}
+@media(max-width:430px){.quick-grid{grid-template-columns:1fr 1fr}}
+
+
+.dual-clock-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.countdown-urgent{color:#c43b32!important}
+.countdown-soon{color:#d87a00!important}
+.countdown-normal{color:#0a8791!important}
+@media(max-width:640px){.dual-clock-grid{grid-template-columns:1fr 1fr}.dual-clock-grid .card{padding:14px}}
+
+
+.time-zone-card{overflow:hidden}
+.live-badge{font-size:12px;font-weight:950;color:#159764;background:#eaf9f1;padding:7px 10px;border-radius:999px}
+.dual-time-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.time-zone-box{border:1px solid var(--line);border-radius:18px;padding:16px;background:linear-gradient(145deg,#fff,#f7fbfb)}
+.hawaii-time-box{border-color:#bfe6e3;background:linear-gradient(145deg,#f2fcfb,#fff)}
+.korea-time-box{border-color:#d8e3f1;background:linear-gradient(145deg,#f5f8ff,#fff)}
+.time-zone-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.time-zone-label{font-size:15px;font-weight:950}.time-zone-name{font-size:11px;color:var(--muted);margin-top:3px}
+.zone-pill{background:#e6f8f6;color:var(--brand);font-size:11px;font-weight:900;padding:5px 8px;border-radius:999px}
+.korea-time-box .zone-pill{background:#edf3ff;color:#315c9b}
+.zone-clock{font-size:34px;font-weight:950;letter-spacing:-1px;margin:14px 0 3px;font-variant-numeric:tabular-nums}
+.zone-date{font-size:13px;color:var(--muted)}
+.time-difference{margin-top:10px;padding:9px 12px;background:#f3f7f8;border-radius:12px;color:#52666c;font-size:13px;font-weight:800;text-align:center}
+.schedule-card-head,.next-box-title-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.schedule-card-head h2{margin:3px 0 0}
+.schedule-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.schedule-summary-box{border:1px solid var(--line);border-radius:17px;padding:15px;background:#fbfdfd;min-height:138px}
+.schedule-summary-box small{display:block;color:var(--muted);font-weight:850;margin-bottom:7px}
+.schedule-summary-box b{display:block;font-size:26px;line-height:1.12;color:var(--text);font-variant-numeric:tabular-nums}
+.summary-place{font-size:15px;color:#52666c;margin-top:7px}.schedule-zone-label,.countdown-date{font-size:12px;color:var(--muted);margin-top:7px}
+.countdown-hint{font-size:12px;margin-top:7px;color:#74898f}
+.countdown-box.normal{border-color:#bfe6e3;background:#f2fcfb}.countdown-box.soon{border-color:#ffd99a;background:#fff9eb}.countdown-box.urgent{border-color:#ffb9b3;background:#fff1ef}
+.countdown-box.soon b{color:#c47400}.countdown-box.urgent b{color:#c43b32}
+.status-badge{font-size:11px;font-weight:950;padding:6px 9px;border-radius:999px;background:#e9f7f6;color:var(--brand)}
+.status-badge.soon{background:#fff1d6;color:#a75d00}.status-badge.urgent{background:#ffe1de;color:#b42318}.status-badge.done{background:#edf1f2;color:#63767b}
+@media(max-width:640px){.dual-time-grid,.schedule-summary-grid{grid-template-columns:1fr}.zone-clock{font-size:31px}.schedule-summary-box{min-height:auto}}
+
+
+.nav{overflow-x:auto;justify-content:flex-start}.nav button{flex:0 0 auto}
+.trip-context-banner{background:linear-gradient(135deg,#0a8791,#3bbdb5);color:white;padding:14px 16px;border-radius:16px;margin-bottom:12px}
+.expense-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+
+.countdown-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:7px}
+.countdown-title-row small{margin-bottom:0!important}
+.countdown-refresh-btn{border:1px solid #bfe6e3;background:#fff;color:var(--brand);font-weight:900;border-radius:999px;padding:7px 11px;font-size:12px;line-height:1;box-shadow:0 3px 10px rgba(10,135,145,.08)}
+.countdown-refresh-btn:active{transform:scale(.97)}
+.countdown-refresh-btn.refreshing{opacity:.65;pointer-events:none}
+.countdown-updated{font-size:11px;color:var(--muted);margin-top:5px}
+
+
+.trip-banner-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#quickTripSwitcher{width:auto;min-width:170px;background:rgba(255,255,255,.96);border:0;border-radius:999px;padding:9px 12px;font-weight:900;color:var(--text)}
+.trip-active-summary{padding:14px;border-radius:16px;background:linear-gradient(135deg,#eefaf8,#f8fcfc);border:1px solid #cbeae7;margin-bottom:14px}
+.trip-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.trip-card{border:1px solid var(--line);border-radius:18px;padding:16px;background:white;position:relative;overflow:hidden}
+.trip-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--trip-color,#0a8791)}
+.trip-card.active{box-shadow:0 0 0 2px rgba(10,135,145,.18);border-color:#9edbd7}
+.trip-card h3{margin:0 0 6px;padding-left:4px}.trip-card-meta{color:var(--muted);font-size:13px;margin-bottom:10px;padding-left:4px}
+.trip-card-dates{font-size:13px;font-weight:800;margin-bottom:12px;padding-left:4px}
+.trip-card-actions{display:flex;gap:7px;flex-wrap:wrap}.trip-card-actions button{padding:8px 10px;border-radius:12px;font-size:12px;font-weight:850}
+.trip-status-pill{position:absolute;right:12px;top:12px;padding:5px 8px;border-radius:999px;background:#e9f8f6;color:var(--brand);font-size:11px;font-weight:950}
+@media(max-width:700px){.trip-list{grid-template-columns:1fr}.trip-banner-top{align-items:flex-start;flex-direction:column}#quickTripSwitcher{width:100%}}
+
+.nav{
+  display:grid!important;
+  grid-template-columns:repeat(9,minmax(62px,1fr))!important;
+  gap:4px!important;
+  overflow-x:auto!important;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom))!important;
+  align-items:center!important;
+}
+.nav button{
+  min-width:62px!important;
+  padding:7px 4px!important;
+  border-radius:14px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:3px!important;
+}
+.nav button span{font-size:22px!important;line-height:1!important}
+.nav button small{font-size:10px!important;line-height:1.15!important;white-space:nowrap!important}
+.nav button.active{
+  background:#e7f7f5!important;
+  color:var(--brand)!important;
+  box-shadow:inset 0 0 0 1px #c6e9e5!important;
+}
+.trip-banner-top.single{display:block!important}
+@media(max-width:760px){
+  .nav{grid-template-columns:repeat(5,minmax(64px,1fr))!important}
+}
+
+</style>
+<script src="./config.js"></script>
+</head>
+<body>
+<input class="day-radio" type="radio" name="day" id="day0" checked><input class="day-radio" type="radio" name="day" id="day1"><input class="day-radio" type="radio" name="day" id="day2"><input class="day-radio" type="radio" name="day" id="day3"><input class="day-radio" type="radio" name="day" id="day4"><input class="day-radio" type="radio" name="day" id="day5"><input class="day-radio" type="radio" name="day" id="day6"><input class="day-radio" type="radio" name="day" id="day7"><input class="day-radio" type="radio" name="day" id="day8">
+<div class="app"><div class="version-banner">✅ Hawaii App v17.1 Stable Slim · AI 여행 비서 · GPT 통역 적용됨</div>
+<header class="hero">
+  <div class="eyebrow">MY TRIP AGENT</div>
+  <h1>🌺 TravelMate AI</h1>
+  <p>9월 4일 ~ 9월 12일 · 해외여행 범용 에이전트</p>
+  <div class="stats">
+    <div class="stat">여행 기간<b>8박 10일</b></div>
+    <div class="stat">항공편<b>KE053 / KE054</b></div>
+  </div>
+</header>
+
+<main>
+
+<section id="homePage" class="page active">
+<div class="trip-context-banner"><div class="trip-banner-top single"><div><small>현재 여행</small><div id="currentTripLabel" style="font-size:19px;font-weight:900">여행 설정이 필요합니다.</div><div id="currentTripMeta"></div></div></div></div>
+
+  
+<section class="card time-zone-card">
+  <div class="section-title">
+    <div><h2>세계 시각</h2><small>하와이와 한국 시간을 동시에 표시합니다.</small></div>
+    <span class="live-badge">● LIVE</span>
+  </div>
+  <div class="dual-time-grid">
+    <div class="time-zone-box hawaii-time-box">
+      <div class="time-zone-head">
+        <div><div class="time-zone-label">🌺 여행지 현지 시각</div><div class="time-zone-name">선택한 여행지 시간대</div></div>
+        <span class="zone-pill">Honolulu</span>
+      </div>
+      <div id="hawaiiClock" class="zone-clock">--:--:--</div>
+      <div id="hawaiiDate" class="zone-date">날짜 확인 중</div>
+    </div>
+    <div class="time-zone-box korea-time-box">
+      <div class="time-zone-head">
+        <div><div class="time-zone-label">🇰🇷 한국 현재 시각</div><div class="time-zone-name">Asia/Seoul · KST</div></div>
+        <span class="zone-pill">Seoul</span>
+      </div>
+      <div id="koreaClock" class="zone-clock">--:--:--</div>
+      <div id="koreaDate" class="zone-date">날짜 확인 중</div>
+    </div>
+  </div>
+  <div class="time-difference">한국과 여행지의 시차를 자동 계산합니다.</div>
+</section>
+
+  
+<section class="card next-schedule-card">
+  <div class="schedule-card-head">
+    <div><div class="note">현재 선택 일정</div><h2 id="homeSelectedDay">9월 4일 (금)</h2></div>
+    <button id="goScheduleBtn" class="btn secondary" type="button">전체 일정</button>
+  </div>
+  <div class="schedule-summary-grid">
+    <div class="schedule-summary-box">
+      <small>다음 일정</small>
+      <b id="nextTime">--</b>
+      <div id="nextPlace" class="summary-place">확인 중</div>
+      <div id="nextTimeZone" class="schedule-zone-label">시간대 확인 중</div>
+    </div>
+    <div id="countdownBox" class="schedule-summary-box countdown-box">
+      <div class="countdown-title-row">
+          <small>남은 시간</small>
+          <button id="refreshCountdownBtn" class="countdown-refresh-btn" type="button">↻ 새로고침</button>
+        </div>
+      <b id="countdownText">--</b>
+      <div id="nextEventDateTime" class="countdown-date">일정 날짜 확인 중</div>
+      <div class="countdown-hint">일정 날짜와 시간을 기준으로 계산합니다.</div><div id="countdownUpdatedAt" class="countdown-updated">마지막 갱신: --:--:--</div>
+    </div>
+  </div>
+  <div class="next-box">
+    <div class="next-box-title-row">
+      <div><div class="note">다음 목적지</div><h3 id="nextActionTitle">확인 중</h3></div>
+      <span id="countdownBadge" class="status-badge">예정</span>
+    </div>
+    <div id="nextActionNote" class="note"></div>
+    <div class="inline-actions">
+      <a id="nextGoogle" class="btn secondary" target="_blank" rel="noopener">Google 지도</a>
+      <a id="nextApple" class="btn ghost" target="_blank" rel="noopener">Apple 지도</a>
+    </div>
+  </div>
+</section>
+
+  <section class="card">
+    <div class="row"><h2>날씨 · 일몰</h2><span class="pill">빠른 검색</span></div>
+    <div class="inline-actions">
+      <a class="btn secondary" href="https://www.google.com/search?q=Honolulu+weather">호놀룰루 날씨</a>
+      <a class="btn ghost" href="https://www.google.com/search?q=Honolulu+sunset+time">일몰 시간</a>
+    </div>
+  </section>
+</section>
+
+<section id="schedulePage" class="page">
+  <section class="card"><div class="notice">날짜를 선택하면 일정이 바뀝니다. 완료 체크는 Safari에서 자동 저장됩니다.</div></section>
+  <section class="card"><div class="date-selector"><label class="date-tab" for="day0">9/4 (금)</label><label class="date-tab" for="day1">9/5 (토)</label><label class="date-tab" for="day2">9/6 (일)</label><label class="date-tab" for="day3">9/7 (월)</label><label class="date-tab" for="day4">9/8 (화)</label><label class="date-tab" for="day5">9/9 (수)</label><label class="date-tab" for="day6">9/10 (목)</label><label class="date-tab" for="day7">9/11 (금)</label><label class="date-tab" for="day8">9/12 (토)</label></div></section>
+  
+    <section class="day-panel panel-0">
+      <div class="day-header">
+        <div>
+          <h2>도착 · 코스트코 · 와이키키</h2>
+          <p>9월 4일 (금)</p>
+        </div>
+        <span>8개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_0_0">
+          <div class="dot"></div>
+          <div class="time">18:00~20:30</div>
+          <div class="place">인천공항 제2터미널 도착</div>
+          <div class="note">입국수속 및 면세품 수령</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=%EC%9D%B8%EC%B2%9C%EA%B5%AD%EC%A0%9C%EA%B3%B5%ED%95%AD%20%EC%A0%9C2%EC%97%AC%EA%B0%9D%ED%84%B0%EB%AF%B8%EB%84%90">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_0_1">
+          <div class="dot"></div>
+          <div class="time">21:00</div>
+          <div class="place">인천 출발</div>
+          <div class="note">대한항공 KE053</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=%EC%9D%B8%EC%B2%9C%EA%B5%AD%EC%A0%9C%EA%B3%B5%ED%95%AD">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_0_2">
+          <div class="dot"></div>
+          <div class="time">10:55</div>
+          <div class="place">하와이 도착</div>
+          <div class="note">입국수속 및 차량 렌트</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Daniel%20K.%20Inouye%20International%20Airport">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_0_3">
+          <div class="dot"></div>
+          <div class="time">13:30~15:00</div>
+          <div class="place">Costco Wholesale</div>
+          <div class="note">쇼핑 및 점심식사</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Costco%20Iwilei">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_0_4">
+          <div class="dot"></div>
+          <div class="time">15:00~16:00</div>
+          <div class="place">Ilima Hotel 체크인</div>
+          <div class="note">짐 정리 및 재정비</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_0_5">
+          <div class="dot"></div>
+          <div class="time">16:30~19:30</div>
+          <div class="place">와이키키 산책 및 저녁</div>
+          <div class="note">Paia Fish Market, Marugame Udon, Musubi Cafe 등</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Waikiki%20Beach">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_0_6">
+          <div class="dot"></div>
+          <div class="time">19:30~20:00</div>
+          <div class="place">카하나모쿠 비치</div>
+          <div class="note">힐튼 하와이안 빌리지 금요 불꽃놀이</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kahanamoku%20Beach">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_0_7">
+          <div class="dot"></div>
+          <div class="time">20:00~21:30</div>
+          <div class="place">장보기</div>
+          <div class="note">Duke&#x27;s Marketplace, Target, ABC Store</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Target%20Waikiki">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+    <section class="day-panel panel-1">
+      <div class="day-header">
+        <div>
+          <h2>카카아코 · 와이키키 · 훌라</h2>
+          <p>9월 5일 (토)</p>
+        </div>
+        <span>7개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_1_0">
+          <div class="dot"></div>
+          <div class="time">07:30~08:30</div>
+          <div class="place">기상 및 준비</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_1_1">
+          <div class="dot"></div>
+          <div class="time">08:45~11:00</div>
+          <div class="place">카카아코 파머스마켓</div>
+          <div class="note">Joja Smash Burger, Omao Man, Baker Dudes 등</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kakaako%20Farmers%20Market">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_1_2">
+          <div class="dot"></div>
+          <div class="time">11:00~12:00</div>
+          <div class="place">호텔 이동 및 물놀이 준비</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_1_3">
+          <div class="dot"></div>
+          <div class="time">12:00~16:00</div>
+          <div class="place">와이키키 비치</div>
+          <div class="note">물놀이 및 스노클링</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kapiolani%20Beach%20Park">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_1_4">
+          <div class="dot"></div>
+          <div class="time">17:00~18:00</div>
+          <div class="place">Yard House</div>
+          <div class="note">저녁 식사 · 해피아워 참고</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Yard%20House%20Waikiki">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_1_5">
+          <div class="dot"></div>
+          <div class="time">18:30~19:30</div>
+          <div class="place">Kuhio Beach Hula Show</div>
+          <div class="note">훌라 공연 관람</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kuhio%20Beach%20Hula%20Mound">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_1_6">
+          <div class="dot"></div>
+          <div class="time">19:30~21:00</div>
+          <div class="place">와이키키 해변 산책</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Waikiki%20Beach">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+    <section class="day-panel panel-2">
+      <div class="day-header">
+        <div>
+          <h2>다이아몬드헤드 · 쿠알로아랜치</h2>
+          <p>9월 6일 (일)</p>
+        </div>
+        <span>6개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_2_0">
+          <div class="dot"></div>
+          <div class="time">06:30~07:30</div>
+          <div class="place">기상 및 준비</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_2_1">
+          <div class="dot"></div>
+          <div class="time">08:00~10:00</div>
+          <div class="place">다이아몬드헤드</div>
+          <div class="note">예약 필수 · 운동화, 모자, 물 준비</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Diamond%20Head%20State%20Monument">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_2_2">
+          <div class="dot"></div>
+          <div class="time">11:00~12:00</div>
+          <div class="place">Fook Yuen Seafood Restaurant</div>
+          <div class="note">점심 식사</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Fook%20Yuen%20Seafood%20Restaurant">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_2_3">
+          <div class="dot"></div>
+          <div class="time">13:30~15:30</div>
+          <div class="place">쿠알로아랜치</div>
+          <div class="note">UTV 랩터 투어 · 예약 필수</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kualoa%20Ranch">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_2_4">
+          <div class="dot"></div>
+          <div class="time">15:30~16:00</div>
+          <div class="place">Tropical Farms</div>
+          <div class="note">마카다미아 농장 후보</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Tropical%20Farms%20Macadamia%20Nuts">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_2_5">
+          <div class="dot"></div>
+          <div class="time">17:00~21:00</div>
+          <div class="place">알라모아나 센터</div>
+          <div class="note">저녁 및 쇼핑</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ala%20Moana%20Center">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+    <section class="day-panel panel-3">
+      <div class="day-header">
+        <div>
+          <h2>83번 국도 · 노스쇼어</h2>
+          <p>9월 7일 (월)</p>
+        </div>
+        <span>8개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_3_0">
+          <div class="dot"></div>
+          <div class="time">07:00~08:45</div>
+          <div class="place">기상 및 조식</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_3_1">
+          <div class="dot"></div>
+          <div class="time">09:30~10:30</div>
+          <div class="place">돌 플랜테이션</div>
+          <div class="note">파인애플 농장</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Dole%20Plantation">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_3_2">
+          <div class="dot"></div>
+          <div class="time">10:45~12:00</div>
+          <div class="place">노스쇼어 맛집</div>
+          <div class="note">Giovanni&#x27;s 또는 HONOS 새우트럭</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Giovanni%27s%20Shrimp%20Truck">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_3_3">
+          <div class="dot"></div>
+          <div class="time">12:00~13:00</div>
+          <div class="place">할레이바</div>
+          <div class="note">마츠모토 쉐이브아이스 등</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Matsumoto%20Shave%20Ice">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_3_4">
+          <div class="dot"></div>
+          <div class="time">13:00~14:00</div>
+          <div class="place">라니아케아 비치</div>
+          <div class="note">거북이 관찰</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Laniakea%20Beach">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_3_5">
+          <div class="dot"></div>
+          <div class="time">14:00~16:30</div>
+          <div class="place">와이메아·샤크스코브</div>
+          <div class="note">파도 상태에 따라 선택</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Shark%27s%20Cove">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_3_6">
+          <div class="dot"></div>
+          <div class="time">16:30~18:30</div>
+          <div class="place">테즈 베이커리·선셋비치</div>
+          <div class="note">간식 및 일몰 감상</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Sunset%20Beach%20Park">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_3_7">
+          <div class="dot"></div>
+          <div class="time">19:00~20:00</div>
+          <div class="place">호텔 이동</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+    <section class="day-panel panel-4">
+      <div class="day-header">
+        <div>
+          <h2>호오말루히아 · PCC</h2>
+          <p>9월 8일 (화)</p>
+        </div>
+        <span>6개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_4_0">
+          <div class="dot"></div>
+          <div class="time">07:00~08:20</div>
+          <div class="place">기상 및 조식</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_4_1">
+          <div class="dot"></div>
+          <div class="time">09:00~10:15</div>
+          <div class="place">호오말루히아 식물원</div>
+          <div class="note">무료입장 및 주차</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Hoomaluhia%20Botanical%20Garden">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_4_2">
+          <div class="dot"></div>
+          <div class="time">10:45~11:45</div>
+          <div class="place">Yummy Huli Huli Chicken</div>
+          <div class="note">점심</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Yummy%20Huli%20Huli%20Chicken">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_4_3">
+          <div class="dot"></div>
+          <div class="time">11:45~12:30</div>
+          <div class="place">라이에 포인트</div>
+          <div class="note">경치 감상 및 사진</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Laie%20Point%20State%20Wayside">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_4_4">
+          <div class="dot"></div>
+          <div class="time">12:30~20:45</div>
+          <div class="place">폴리네시안 문화센터</div>
+          <div class="note">PCC 투어, 저녁, HA 쇼 · 예약 필수</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Polynesian%20Cultural%20Center">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_4_5">
+          <div class="dot"></div>
+          <div class="time">21:00~22:00</div>
+          <div class="place">호텔 이동</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+    <section class="day-panel panel-5">
+      <div class="day-header">
+        <div>
+          <h2>진주만 · 파라다이스코브 · 와이켈레</h2>
+          <p>9월 9일 (수)</p>
+        </div>
+        <span>5개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_5_0">
+          <div class="dot"></div>
+          <div class="time">07:00~08:00</div>
+          <div class="place">기상 및 준비</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_5_1">
+          <div class="dot"></div>
+          <div class="time">08:30~12:00</div>
+          <div class="place">진주만</div>
+          <div class="note">USS Missouri 및 기념관 · 예약 필수</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Pearl%20Harbor%20National%20Memorial">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_5_2">
+          <div class="dot"></div>
+          <div class="time">12:30~16:00</div>
+          <div class="place">파라다이스 코브 비치</div>
+          <div class="note">몽크실 관찰 및 물놀이</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Paradise%20Cove%20Public%20Beach">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_5_3">
+          <div class="dot"></div>
+          <div class="time">16:20~19:00</div>
+          <div class="place">와이켈레 프리미엄 아울렛</div>
+          <div class="note">쇼핑 및 저녁 후보</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Waikele%20Premium%20Outlets">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_5_4">
+          <div class="dot"></div>
+          <div class="time">19:00~19:30</div>
+          <div class="place">호텔 이동</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+    <section class="day-panel panel-6">
+      <div class="day-header">
+        <div>
+          <h2>72번 국도 · 동부 해안 드라이브</h2>
+          <p>9월 10일 (목)</p>
+        </div>
+        <span>9개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_6_0">
+          <div class="dot"></div>
+          <div class="time">07:00~08:45</div>
+          <div class="place">기상 및 준비</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_6_1">
+          <div class="dot"></div>
+          <div class="time">09:00</div>
+          <div class="place">아멜리아 에어하트 기념비</div>
+          <div class="note">72번 국도 시작</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Amelia%20Earhart%20Marker">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_6_2">
+          <div class="dot"></div>
+          <div class="time">09:30</div>
+          <div class="place">라나이 전망대</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Lanai%20Lookout">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_6_3">
+          <div class="dot"></div>
+          <div class="time">10:00</div>
+          <div class="place">할로나 블로우홀</div>
+          <div class="note">전망대</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Halona%20Blowhole%20Lookout">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_6_4">
+          <div class="dot"></div>
+          <div class="time">11:00</div>
+          <div class="place">마카푸우 전망대</div>
+          <div class="note">시간 여유 시 트레일</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Makapuu%20Lookout">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_6_5">
+          <div class="dot"></div>
+          <div class="time">12:00~14:30</div>
+          <div class="place">카이오나 비치 파크</div>
+          <div class="note">오전 물놀이 추천</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kaiona%20Beach%20Park">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_6_6">
+          <div class="dot"></div>
+          <div class="time">14:30~16:30</div>
+          <div class="place">카일루아·라니카이</div>
+          <div class="note">해변 및 산책</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kailua%20Beach%20Park">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_6_7">
+          <div class="dot"></div>
+          <div class="time">17:00~18:30</div>
+          <div class="place">Paia Fish Market Waikiki</div>
+          <div class="note">저녁 후보</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Paia%20Fish%20Market%20Waikiki">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_6_8">
+          <div class="dot"></div>
+          <div class="time">19:00~20:00</div>
+          <div class="place">호텔 도착</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+    <section class="day-panel panel-7">
+      <div class="day-header">
+        <div>
+          <h2>쿠일리마 코브 · 탄탈루스</h2>
+          <p>9월 11일 (금)</p>
+        </div>
+        <span>9개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_7_0">
+          <div class="dot"></div>
+          <div class="time">07:00~08:00</div>
+          <div class="place">기상 및 준비</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_7_1">
+          <div class="dot"></div>
+          <div class="time">08:00~09:00</div>
+          <div class="place">이동 및 주차</div>
+          <div class="note">83번 또는 72번 국도 이용</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kuilima%20Cove">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_7_2">
+          <div class="dot"></div>
+          <div class="time">09:00~13:00</div>
+          <div class="place">쿠일리마 코브 스노클링</div>
+          <div class="note">음식과 간식 충분히 준비</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kuilima%20Cove">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_7_3">
+          <div class="dot"></div>
+          <div class="time">13:00~15:00</div>
+          <div class="place">호텔 이동 및 휴식</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_7_4">
+          <div class="dot"></div>
+          <div class="time">15:00~16:30</div>
+          <div class="place">와이키키 산책</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Waikiki%20Beach">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_7_5">
+          <div class="dot"></div>
+          <div class="time">16:30~17:40</div>
+          <div class="place">Kickin Kajun Honolulu</div>
+          <div class="note">던지니스 크랩콤보, 크로우피시</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kickin%20Kajun%20Honolulu">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_7_6">
+          <div class="dot"></div>
+          <div class="time">17:40~18:15</div>
+          <div class="place">Lower Tantalus Viewpoint</div>
+          <div class="note">노을 감상</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Lower%20Tantalus%20Lookout">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_7_7">
+          <div class="dot"></div>
+          <div class="time">18:15~19:00</div>
+          <div class="place">Tantalus Lookout</div>
+          <div class="note">야경 감상</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Tantalus%20Lookout">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_7_8">
+          <div class="dot"></div>
+          <div class="time">19:00~20:00</div>
+          <div class="place">Walmart</div>
+          <div class="note">마지막 장보기</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Walmart%20Honolulu">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+    <section class="day-panel panel-8">
+      <div class="day-header">
+        <div>
+          <h2>귀국</h2>
+          <p>9월 12일 (토)</p>
+        </div>
+        <span>6개 일정</span>
+      </div>
+      <div class="timeline">
+        <article class="item" data-done-key="schedule_8_0">
+          <div class="dot"></div>
+          <div class="time">07:30~08:30</div>
+          <div class="place">기상 및 조식</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_8_1">
+          <div class="dot"></div>
+          <div class="time">08:30~09:30</div>
+          <div class="place">와이키키 해변 산책</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Waikiki%20Beach">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_8_2">
+          <div class="dot"></div>
+          <div class="time">09:30~10:00</div>
+          <div class="place">체크아웃 및 공항 이동</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Daniel%20K.%20Inouye%20International%20Airport">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_8_3">
+          <div class="dot"></div>
+          <div class="time">10:00~11:00</div>
+          <div class="place">렌터카 반납 및 출국수속</div>
+          
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Daniel%20K.%20Inouye%20International%20Airport">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_8_4">
+          <div class="dot"></div>
+          <div class="time">13:05</div>
+          <div class="place">하와이 출발</div>
+          <div class="note">대한항공 KE054</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Daniel%20K.%20Inouye%20International%20Airport">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        
+        <article class="item" data-done-key="schedule_8_5">
+          <div class="dot"></div>
+          <div class="time">17:45</div>
+          <div class="place">인천 도착</div>
+          <div class="note">9월 13일 도착</div>
+          <div class="actions">
+            <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=%EC%9D%B8%EC%B2%9C%EA%B5%AD%EC%A0%9C%EA%B3%B5%ED%95%AD">📍 지도</a>
+            <label class="done-label"><input class="persist-check" type="checkbox"> 완료</label>
+          </div>
+        </article>
+        </div>
+    </section>
+    
+</section>
+
+
+<section id="englishPage" class="page">
+  <section class="card">
+    <div class="section-title"><h2>🗣 현지 영어</h2><small>오프라인 문장</small></div>
+    <div class="notice">문장을 검색하고, 영어 음성으로 읽거나 직원에게 크게 보여줄 수 있습니다.</div>
+  </section>
+  <section class="card">
+    <label class="field"><span>한국어·영어 검색</span><input id="phraseSearch" type="search" placeholder="예: 포장, 화장실, 예약, 보험"></label>
+    <div id="phraseCategories" class="category-chips" style="margin-top:10px"></div>
+  </section>
+  <section class="card">
+    <div class="section-title"><h2>⭐ 즐겨찾기</h2><small id="favoriteCount">0개</small></div>
+    <div id="favoritePhrases" class="note">즐겨찾기한 문장이 없습니다.</div>
+  </section>
+  <section class="card">
+    <div class="section-title"><h2>필수 문장</h2><small id="phraseCount"></small></div>
+    <div id="phraseList"></div>
+  </section>
+  <section class="card">
+    <div class="section-title"><h2>🔤 자유 번역</h2><small>Google 번역</small></div>
+    <label class="field"><span>한국어 입력</span><textarea id="translateInput" placeholder="번역할 한국어 문장을 입력하세요."></textarea></label>
+    <div id="freeTranslationWrap" class="translation-result hidden">
+      <div class="label">🇺🇸 영어 번역</div>
+      <div id="freeTranslationResult" class="text"></div>
+    </div>
+    <div class="inline-actions">
+      <button id="openTranslate" class="btn" type="button">앱에서 영어로 번역</button>
+      <button id="speakKorean" class="btn secondary" type="button">한국어 읽기</button>
+    </div>
+  </section>
+</section>
+<div id="bigOverlay" class="big-overlay">
+  <div class="big-dialog">
+    <div id="bigEnglish" class="big-en"></div>
+    <div id="bigKorean" class="big-ko"></div>
+    <div class="inline-actions" style="justify-content:center;margin-top:20px">
+      <button id="bigSpeak" class="btn" type="button">🔊 읽기</button>
+      <button id="bigClose" class="btn ghost" type="button">닫기</button>
+    </div>
+  </div>
+</div>
+
+
+<section id="interpreterPage" class="page">
+  <section class="card">
+    <div class="section-title"><h2>🎙 양방향 통역</h2><small>음성 인식 + 번역 연결</small></div>
+    <div class="notice">
+      <b>GPT가 여행 상황과 최근 대화 문맥을 반영해 자연스럽게 통역합니다.</b><br>
+      상대방의 영어를 문자로 받아 적은 뒤 한국어 번역을 열 수 있습니다.
+      내가 한국어로 말한 내용도 영어 번역으로 바로 연결됩니다.
+    </div>
+  </section>
+
+  <section class="card">
+    <div id="interpreterSupport" class="interpreter-status">음성 인식 기능을 확인하는 중입니다.</div>
+    <div class="interpreter-mode" style="margin-top:10px">
+      <div class="interpreter-panel english">
+        <h3>🇺🇸 상대방 영어</h3>
+        <div id="heardEnglish" class="interpreter-text">영어 듣기 버튼을 누른 뒤 상대방에게 말해 달라고 하세요.</div>
+        <button id="listenEnglishBtn" class="mic-button" type="button">🎤 영어 듣기</button>
+        <div id="englishTranslationWrap" class="translation-result hidden">
+          <div class="label">🇰🇷 한국어 번역</div>
+          <div id="englishTranslation" class="text"></div>
+        </div>
+        <div class="inline-actions">
+          <button id="translateEnglishBtn" class="btn secondary" type="button">앱에서 한국어 번역</button>
+          <button id="copyEnglishBtn" class="btn ghost" type="button">복사</button>
+          <button id="clearEnglishBtn" class="btn ghost" type="button">지우기</button>
+        </div>
+      </div>
+
+      <div class="interpreter-panel korean">
+        <h3>🇰🇷 내가 할 말</h3>
+        <div id="spokenKorean" class="interpreter-text">한국어 말하기 버튼을 누르고 하고 싶은 말을 말하세요.</div>
+        <button id="listenKoreanBtn" class="mic-button" type="button">🎤 한국어 말하기</button>
+        <div id="koreanTranslationWrap" class="translation-result hidden">
+          <div class="label">🇺🇸 영어 번역</div>
+          <div id="koreanTranslation" class="text"></div>
+        </div>
+        <div class="inline-actions">
+          <button id="translateKoreanBtn" class="btn secondary" type="button">앱에서 영어 번역</button>
+          <button id="speakTranslatedEnglishBtn" class="btn ghost" type="button">🔊 번역 영어 읽기</button>
+          <button id="clearKoreanBtn" class="btn ghost" type="button">지우기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>⚡ 빠른 응답</h2><small>누르면 크게 표시·영어 읽기</small></div>
+    <div id="quickResponses" class="quick-response-grid"></div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>📝 대화 기록</h2><button id="clearConversationLog" class="btn ghost" type="button">전체 삭제</button></div>
+    <div id="conversationLog" class="conversation-log note">기록이 없습니다.</div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>🤖 GPT 통역 연결 상태</h2><span id="translationApiState" class="api-light"><span class="api-dot"></span>확인 중</span></div>
+    <div class="translation-settings">
+      <div class="note">GPT 번역은 Supabase Edge Function을 통해 처리되어 OpenAI API 키가 앱에 노출되지 않습니다.</div>
+      
+      <label class="field">
+        <span>통역 스타일</span>
+        <select id="translationStyle">
+          <option value="natural">자연스럽고 공손하게</option>
+          <option value="literal">원문에 가깝게</option>
+          <option value="simple">짧고 쉽게</option>
+        </select>
+      </label>
+      <label class="done-label"><input id="useContextToggle" type="checkbox" checked> 최근 대화 문맥을 반영</label>
+
+      <label class="done-label"><input id="autoTranslateToggle" type="checkbox" checked> 음성 인식 후 자동 번역</label>
+      <label class="done-label"><input id="autoSpeakToggle" type="checkbox" checked> 한국어→영어 자동 읽기 (선택)</label>
+    </div>
+    <div id="translationApiError" class="translation-error hidden"></div>
+    <div class="inline-actions" style="margin-top:10px">
+      <button id="testTranslationApi" class="btn secondary" type="button">연결 테스트</button>
+      <a class="btn ghost" href="https://translate.google.com/?sl=auto&tl=ko&op=translate">비상용 Google 번역</a>
+    </div>
+  </section>
+</section>
+
+<section id="reservationPage" class="page">
+  <div class="card rental-highlight">
+    <div class="row"><h2 class="title">🚙 Hertz 렌터카 확정 정보</h2><span class="pill">Q4</span></div>
+    <div class="mini" style="margin-top:10px">
+      <b>Midsize SUV 2WD</b>
+      <div class="muted">Nissan Rogue 또는 동급</div>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <div class="mini"><b>픽업</b><div>2026-09-04 12:00</div></div>
+      <div class="mini"><b>반납</b><div>2026-09-12 11:00</div></div>
+    </div>
+    <div class="mini" style="margin-top:10px">
+      <b>Honolulu International Airport Hertz</b>
+      <div>300 Rodgers Blvd, Honolulu, HI 96819</div>
+      <div>(808) 837-7100</div>
+      <div class="muted">공항 렌터카 센터(CONRAC) 방향</div>
+    </div>
+    <label class="field" style="margin-top:10px"><span>예약번호</span><input id="hertzBooking" data-save="hertz_booking" placeholder="예약번호 입력"></label>
+    <div class="actions">
+      <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Hertz+300+Rodgers+Blvd+Honolulu">Google 지도</a>
+      <a class="btn ghost" href="https://maps.apple.com/?q=Hertz+300+Rodgers+Blvd+Honolulu">Apple 지도</a>
+      <a class="btn ghost" href="tel:+18088377100">전화</a>
+      <button id="copyHertzBooking" class="btn">예약번호 복사</button>
+    </div>
+    <div id="copyHertzMsg" class="copy-msg"></div>
+  </div>
+
+  <section class="card">
+    <div class="section-title"><h2>🎫 예약 및 중요 정보</h2><small>자동 저장</small></div>
+    <div class="notice">아이폰에서는 파일 미리보기보다 Safari에서 여는 것이 좋습니다. 입력 내용은 현재 기기의 Safari 저장소에 보관됩니다.</div>
+  </section>
+
+  <section class="card">
+    <div class="res-card">
+      <div class="res-head"><h3>✈️ 항공권 · 출국편</h3><span class="status">KE053</span></div>
+      <div class="fields two">
+        
+    <label class="field">
+      <span>편명</span>
+      <input type="text" data-save="flight_out_no" placeholder="KE053">
+    </label>
+        
+    <label class="field">
+      <span>출발시간</span>
+      <input type="text" data-save="flight_out_depart" placeholder="2026-09-04 21:00">
+    </label>
+        
+    <label class="field">
+      <span>도착시간</span>
+      <input type="text" data-save="flight_out_arrive" placeholder="2026-09-04 10:55">
+    </label>
+        
+    <label class="field">
+      <span>예약번호</span>
+      <input type="text" data-save="flight_out_booking" placeholder="예약번호">
+    </label>
+      </div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-head"><h3>✈️ 항공권 · 귀국편</h3><span class="status">KE054</span></div>
+      <div class="fields two">
+        
+    <label class="field">
+      <span>편명</span>
+      <input type="text" data-save="flight_in_no" placeholder="KE054">
+    </label>
+        
+    <label class="field">
+      <span>출발시간</span>
+      <input type="text" data-save="flight_in_depart" placeholder="2026-09-12 13:05">
+    </label>
+        
+    <label class="field">
+      <span>도착시간</span>
+      <input type="text" data-save="flight_in_arrive" placeholder="2026-09-13 17:45">
+    </label>
+        
+    <label class="field">
+      <span>예약번호</span>
+      <input type="text" data-save="flight_in_booking" placeholder="예약번호">
+    </label>
+      </div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-head"><h3>🏨 호텔</h3><span class="status">Ilima Hotel</span></div>
+      <div class="fields two">
+        
+    <label class="field">
+      <span>호텔명</span>
+      <input type="text" data-save="hotel_name" placeholder="Ilima Hotel">
+    </label>
+        
+    <label class="field">
+      <span>주소</span>
+      <input type="text" data-save="hotel_address" placeholder="445 Nohonani St, Honolulu">
+    </label>
+        
+    <label class="field">
+      <span>체크인 시간</span>
+      <input type="text" data-save="hotel_checkin" placeholder="2026-09-04 15:00">
+    </label>
+        
+    <label class="field">
+      <span>체크아웃 시간</span>
+      <input type="text" data-save="hotel_checkout" placeholder="2026-09-12 10:00">
+    </label>
+        
+    <label class="field">
+      <span>예약번호</span>
+      <input type="text" data-save="hotel_booking" placeholder="예약번호">
+    </label>
+        
+    <label class="field">
+      <span>전화번호</span>
+      <input type="text" data-save="hotel_phone" placeholder="+1 ">
+    </label>
+      </div>
+      <div class="inline-actions">
+        <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Ilima%20Hotel">📍 호텔 지도</a>
+        <a class="btn ghost" href="tel:+1">☎️ 전화</a>
+      </div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-head"><h3>🚙 렌터카</h3><span class="status">공항 수령</span></div>
+      <div class="fields two">
+        
+    <label class="field">
+      <span>업체명</span>
+      <input type="text" data-save="car_company" placeholder="렌터카 업체명">
+    </label>
+        
+    <label class="field">
+      <span>예약번호</span>
+      <input type="text" data-save="car_booking" placeholder="예약번호">
+    </label>
+        
+    <label class="field">
+      <span>차량 수령 장소</span>
+      <input type="text" data-save="car_pickup" placeholder="Daniel K. Inouye International Airport">
+    </label>
+        
+    <label class="field">
+      <span>수령 시간</span>
+      <input type="text" data-save="car_pickup_time" placeholder="2026-09-04">
+    </label>
+        
+    <label class="field">
+      <span>반납 장소</span>
+      <input type="text" data-save="car_return" placeholder="Daniel K. Inouye International Airport">
+    </label>
+        
+    <label class="field">
+      <span>반납 시간</span>
+      <input type="text" data-save="car_return_time" placeholder="2026-09-12 10:00">
+    </label>
+        
+    <label class="field">
+      <span>전화번호</span>
+      <input type="text" data-save="car_phone" placeholder="+1 ">
+    </label>
+      </div>
+      <div class="inline-actions">
+        <a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Daniel%20K.%20Inouye%20International%20Airport%20Rental%20Car%20Center">📍 수령 장소</a>
+        <a class="btn ghost" href="tel:+1">☎️ 전화</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>🏄 관광 예약</h2><small>날짜·시간·인원·예약번호</small></div>
+
+    <div class="res-card">
+      <div class="res-head"><h3>다이아몬드헤드</h3><span class="status">9/6</span></div>
+      <div class="fields two">
+        
+    <label class="field">
+      <span>날짜</span>
+      <input type="text" data-save="tour_dh_date" placeholder="2026-09-06">
+    </label>
+        
+    <label class="field">
+      <span>시간</span>
+      <input type="text" data-save="tour_dh_time" placeholder="08:00">
+    </label>
+        
+    <label class="field">
+      <span>인원</span>
+      <input type="text" data-save="tour_dh_people" placeholder="">
+    </label>
+        
+    <label class="field">
+      <span>예약번호</span>
+      <input type="text" data-save="tour_dh_booking" placeholder="">
+    </label>
+      </div>
+      <div class="inline-actions"><a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Diamond%20Head%20State%20Monument">📍 지도</a></div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-head"><h3>쿠알로아랜치 UTV</h3><span class="status">9/6</span></div>
+      <div class="fields two">
+        
+    <label class="field">
+      <span>날짜</span>
+      <input type="text" data-save="tour_kr_date" placeholder="2026-09-06">
+    </label>
+        
+    <label class="field">
+      <span>시간</span>
+      <input type="text" data-save="tour_kr_time" placeholder="13:30">
+    </label>
+        
+    <label class="field">
+      <span>인원</span>
+      <input type="text" data-save="tour_kr_people" placeholder="">
+    </label>
+        
+    <label class="field">
+      <span>예약번호</span>
+      <input type="text" data-save="tour_kr_booking" placeholder="">
+    </label>
+      </div>
+      <div class="inline-actions"><a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Kualoa%20Ranch">📍 지도</a></div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-head"><h3>폴리네시안 문화센터</h3><span class="status">9/8</span></div>
+      <div class="fields two">
+        
+    <label class="field">
+      <span>날짜</span>
+      <input type="text" data-save="tour_pcc_date" placeholder="2026-09-08">
+    </label>
+        
+    <label class="field">
+      <span>시간</span>
+      <input type="text" data-save="tour_pcc_time" placeholder="12:30">
+    </label>
+        
+    <label class="field">
+      <span>인원</span>
+      <input type="text" data-save="tour_pcc_people" placeholder="">
+    </label>
+        
+    <label class="field">
+      <span>예약번호</span>
+      <input type="text" data-save="tour_pcc_booking" placeholder="">
+    </label>
+      </div>
+      <div class="inline-actions"><a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Polynesian%20Cultural%20Center">📍 지도</a></div>
+    </div>
+
+    <div class="res-card">
+      <div class="res-head"><h3>진주만</h3><span class="status">9/9</span></div>
+      <div class="fields two">
+        
+    <label class="field">
+      <span>날짜</span>
+      <input type="text" data-save="tour_ph_date" placeholder="2026-09-09">
+    </label>
+        
+    <label class="field">
+      <span>시간</span>
+      <input type="text" data-save="tour_ph_time" placeholder="08:30">
+    </label>
+        
+    <label class="field">
+      <span>인원</span>
+      <input type="text" data-save="tour_ph_people" placeholder="">
+    </label>
+        
+    <label class="field">
+      <span>예약번호</span>
+      <input type="text" data-save="tour_ph_booking" placeholder="">
+    </label>
+      </div>
+      <div class="inline-actions"><a class="btn secondary" href="https://www.google.com/maps/search/?api=1&query=Pearl%20Harbor%20National%20Memorial">📍 지도</a></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>🧾 QR · 바우처</h2><small>이미지 또는 링크</small></div>
+    <div class="res-card">
+      <div class="fields">
+        
+    <label class="field">
+      <span>바우처 링크</span>
+      <input type="url" data-save="voucher_link" placeholder="https://...">
+    </label>
+        <label class="field"><span>QR·바우처 이미지</span><input id="voucherImage" type="file" accept="image/*"></label>
+      </div>
+      <div class="inline-actions">
+        <button class="btn secondary" id="openVoucherLink" type="button">🔗 링크 열기</button>
+        <button class="btn ghost" id="clearVoucher" type="button">삭제</button>
+      </div>
+      <div class="qr-preview" id="voucherPreview"><img id="voucherImg" alt="바우처 미리보기"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>☎️ 연락처</h2><small>전화번호 저장</small></div>
+    <div class="contact-grid">
+      <div class="contact-row"><b>호텔</b>
+    <label class="field">
+      <span>전화번호</span>
+      <input type="text" data-save="contact_hotel" placeholder="+1 ">
+    </label></div>
+      <div class="contact-row"><b>렌터카</b>
+    <label class="field">
+      <span>전화번호</span>
+      <input type="text" data-save="contact_car" placeholder="+1 ">
+    </label></div>
+      <div class="contact-row"><b>여행자보험</b>
+    <label class="field">
+      <span>24시간 전화번호</span>
+      <input type="text" data-save="contact_insurance" placeholder="">
+    </label></div>
+      <div class="contact-row"><b>대한항공</b>
+    <label class="field">
+      <span>전화번호</span>
+      <input type="text" data-save="contact_kal" placeholder="">
+    </label></div>
+      <div class="contact-row"><b>기타 긴급 연락처</b>
+    <label class="field">
+      <span>전화번호</span>
+      <input type="text" data-save="contact_emergency" placeholder="">
+    </label></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="section-title"><h2>📝 공통 메모</h2><small>자동 저장</small></div>
+    <label class="field"><textarea data-save="reservation_memo" placeholder="주차 위치, 준비물, 체크인 유의사항 등을 기록하세요."></textarea></label>
+  </section>
+</section>
+
+<section id="tipsPage" class="page">
+  <section class="card">
+    <h2 style="margin-bottom:10px">💡 여행 팁</h2>
+    <div class="notice">노스쇼어는 후보지가 많으므로 하루 5~6곳만 선택하고, 해변 일정은 파도와 날씨에 따라 조정하세요.</div>
+    <p><b>차량 보안</b><br>해변에서는 차량 내부에 가방과 귀중품을 남기지 않는 편이 안전합니다.</p>
+    <p><b>출국일</b><br>렌터카 반납 시간을 포함해 출발 3시간 전 공항 도착을 기준으로 잡으세요.</p>
+  </section>
+</section>
+
+<section id="checkPage" class="page">
+  <section class="card">
+    <div class="section-title"><h2>✅ 준비물 체크</h2><button id="addChecklistItem" class="btn secondary" type="button">+ 준비물 추가</button></div>
+    <div class="notice">추가·수정·삭제 내용과 체크 상태는 자동 저장됩니다.</div>
+    <div id="checklist" style="margin-top:10px"></div>
+  </section>
+</section>
+
+<section id="toolsPage" class="page">
+  <section class="card"><div class="section-title"><h2>🛒 쇼핑 목록</h2><button class="btn secondary" id="addShopping">추가</button></div><div id="shoppingList"></div></section>
+  <section class="card"><div class="section-title"><h2>💰 여행 경비</h2><button class="btn secondary" id="addExpense">추가</button></div><div class="big-number" id="expenseTotal">$0.00</div><div class="note" id="expenseWon">₩0</div><div id="expenseList"></div></section>
+  <section class="card"><h2 style="margin-bottom:10px">💱 환율 계산기</h2><div class="fields two"><label class="field"><span>달러(USD)</span><input id="usdInput" type="number" inputmode="decimal"></label><label class="field"><span>환율(KRW)</span><input id="rateInput" type="number" value="1400"></label></div><div class="big-number" id="krwResult">₩0</div></section>
+  <section class="card"><h2 style="margin-bottom:10px">🚗 주차 위치</h2><div class="notice" id="parkingStatus">저장된 위치가 없습니다.</div><div class="inline-actions"><button class="btn" id="saveParking">현재 위치 저장</button><a class="btn secondary hidden" id="openParking">지도 열기</a><button class="btn ghost" id="clearParking">삭제</button></div></section>
+</section>
+<section id="explorePage" class="page">
+<div class="card">
+  <label class="field">
+    <span>추천 맛집 검색</span>
+    <input id="foodSearch" type="search" placeholder="맛집명·지역·메뉴 검색">
+  </label>
+</div>
+
+  
+<section class="card" id="foodAddCard">
+  <div class="section-title"><h2>➕ 추천 맛집 추가</h2><small>자동 저장</small></div>
+  <div class="food-form">
+    <div class="food-meta">
+      <label class="field"><span>지역</span><input id="foodAreaInput" type="text" placeholder="와이키키"></label>
+      <label class="field"><span>맛집명</span><input id="foodNameInput" type="text" placeholder="식당 이름"></label>
+    </div>
+    <label class="field"><span>추천 메뉴</span><input id="foodMenuInput" type="text" placeholder="추천 메뉴"></label>
+    <label class="field"><span>지도 검색어 또는 링크</span><input id="foodMapInput" type="text" placeholder="식당명 또는 Google 지도 링크"></label>
+    <button id="addFoodBtn" class="btn" type="button">맛집 추가</button>
+  </div>
+</section>
+
+<section class="card"><div class="section-title"><h2>🍴 추천 맛집</h2><small id="foodSummary"></small></div><div id="foodList"></div></section>
+  <section class="card"><h2 style="margin-bottom:10px">📷 여행 앨범</h2><label class="field"><span>사진 추가</span><input id="albumFile" type="file" accept="image/*" multiple></label><div id="albumGrid" class="album-grid"></div><div class="inline-actions"><button class="btn ghost" id="clearAlbum">앨범 비우기</button></div></section>
+</section>
+
+<section class="page" id="aiPage">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">V13 ULTIMATE</div>
+      <h2>🧭 AI 여행 비서</h2>
+      <p>하와이 현장에서 들은 말, 사진, 상황을 바탕으로 다음 행동까지 추천합니다.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="gpt-badge">🤖 상황 이해형 AI</div>
+    <label class="field">
+      <span>지금 어떤 도움이 필요한가요?</span>
+      <textarea id="aiTravelInput" rows="4" placeholder="예: 렌터카 직원이 차량을 가득 주유해서 반납하라고 했어. 어떻게 확인하면 돼?"></textarea>
+    </label>
+    <div class="quick-grid">
+      <button class="chip ai-preset" data-text="호텔 체크인할 때 예약 확인과 보증금에 대해 물어볼 표현을 알려줘">🏨 호텔 체크인</button>
+      <button class="chip ai-preset" data-text="렌터카 수령할 때 보험, 연료, 반납 조건을 확인할 표현을 알려줘">🚙 렌터카</button>
+      <button class="chip ai-preset" data-text="식당에서 알레르기, 추천 메뉴, 계산을 물어볼 표현을 알려줘">🍽️ 식당</button>
+      <button class="chip ai-preset" data-text="투어가 지연되거나 취소됐을 때 확인할 질문을 알려줘">🌊 투어 문제</button>
+    </div>
+    <button class="primary wide" id="askTravelAiBtn">AI에게 물어보기</button>
+  </div>
+
+  <div class="card hidden" id="aiTravelResultWrap">
+    <h3>추천 안내</h3>
+    <div id="aiTravelSummary" class="ai-note"></div>
+    <h4>바로 사용할 영어</h4>
+    <div id="aiTravelEnglish" class="translation-result"></div>
+    <div class="button-row">
+      <button id="speakAiEnglishBtn">🔊 영어 읽기</button>
+      <button id="copyAiEnglishBtn">📋 복사</button>
+    </div>
+    <h4>다음에 확인할 내용</h4>
+    <div id="aiTravelActions" class="suggestion-list"></div>
+  </div>
+
+  <div class="card">
+    <h3>📷 메뉴판·표지판 사진 번역</h3>
+    <p class="muted">사진을 선택하면 핵심 내용을 한국어로 번역하고 주의할 점을 알려줍니다.</p>
+    <input id="visionImageInput" type="file" accept="image/*" capture="environment">
+    <img id="visionPreview" class="hidden" alt="선택한 사진 미리보기" style="max-width:100%;border-radius:14px;margin-top:10px">
+    <button class="primary wide" id="analyzeImageBtn">사진 분석·번역</button>
+    <div id="visionResultWrap" class="hidden">
+      <div id="visionResult" class="translation-result"></div>
+    </div>
+  </div>
+</section>
+
+
+<section class="card hidden" id="tripEditorCard">
+    <div class="section-title">
+      <div><h2 id="tripEditorTitle">새 여행 만들기</h2><small>도시·국가·시간대·통화·기간을 입력하세요.</small></div>
+      <button class="secondary" id="closeTripEditorBtn" type="button">닫기</button>
+    </div>
+    <input type="hidden" id="editTripId">
+    <div class="grid">
+      <label class="field"><span>여행 이름</span><input id="editTripName" placeholder="예: 2027 도쿄 가족여행"></label>
+      <label class="field"><span>도시</span><input id="editTripCity" placeholder="예: Tokyo"></label>
+      <label class="field"><span>국가</span><input id="editTripCountry" placeholder="예: Japan"></label>
+      <label class="field"><span>IANA 시간대</span><input id="editTripTimezone" placeholder="예: Asia/Tokyo"></label>
+      <label class="field"><span>통화</span><input id="editTripCurrency" placeholder="예: JPY" maxlength="3"></label>
+      <label class="field"><span>대표 색상</span><input id="editTripColor" type="color" value="#0a8791"></label>
+      <label class="field"><span>시작일</span><input id="editTripStart" type="date"></label>
+      <label class="field"><span>종료일</span><input id="editTripEnd" type="date"></label>
+    </div>
+    <div class="row wrap">
+      <button class="primary" id="saveTripBtn" type="button">여행 저장</button>
+      <button class="secondary" id="cancelTripBtn" type="button">취소</button>
+    </div>
+  </section>
+</section>
+
+</main>
+
+<nav class="bottom">
+  <button class="active" data-page="home"><span>🏠</span>홈</button>
+  <button data-page="schedule"><span>📅</span>일정</button>
+  <button data-page="english"><span>🗣</span>영어</button>
+  <button class="nav-btn" data-page="ai"><span>🧭</span><small>AI 비서</small></button><button data-page="interpreter"><span>🎙</span>통역</button>
+  <button data-page="reservation"><span>🎫</span>예약</button>
+  <button data-page="tools"><span>🧰</span>도구</button>
+  <button data-page="explore"><span>🌴</span>탐색</button>
+  <button data-page="check"><span>✅</span>준비물</button>
+
+
+
+
+
+
+
+</nav>
+<div class="footer">Hawaii Travel App v17.1 Stable Slim · AI 여행 비서 · GPT 통역</div>
+</div>
+
+<script>
+const STORE_PREFIX = "hawaii_v13_";
+const save = (k,v) => localStorage.setItem(STORE_PREFIX+k,v);
+const load = k => localStorage.getItem(STORE_PREFIX+k);
+
+document.querySelectorAll("[data-save]").forEach(el => {
+  const key = el.dataset.save;
+  const saved = load(key);
+  if(saved !== null) el.value = saved;
+  el.addEventListener("input",()=>save(key,el.value));
+});
+
+document.querySelectorAll("[data-done-key]").forEach(item => {
+  const key = item.dataset.doneKey;
+  const box = item.querySelector(".persist-check");
+  box.checked = load(key)==="1";
+  item.classList.toggle("is-done",box.checked);
+  box.addEventListener("change",()=>{
+    save(key,box.checked?"1":"0");
+    item.classList.toggle("is-done",box.checked);
+  });
+});
+
+document.querySelectorAll(".bottom button").forEach(btn => {
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".bottom button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    const targetPage = document.getElementById(btn.dataset.page + "Page");
+      if (targetPage) {
+        targetPage.classList.add("active");
+      } else {
+        console.error("페이지를 찾을 수 없습니다:", btn.dataset.page + "Page");
+        return;
+      }
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+});
+
+
+
+const fileInput=document.getElementById("voucherImage");
+const preview=document.getElementById("voucherPreview");
+const img=document.getElementById("voucherImg");
+fileInput.addEventListener("change",()=>{
+  const f=fileInput.files&&fileInput.files[0];
+  if(!f) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try {
+      save("voucher_image",e.target.result);
+      img.src=e.target.result; preview.style.display="block";
+    } catch(err) {
+      alert("이미지 용량이 커서 저장하지 못했습니다. 더 작은 이미지나 스크린샷을 사용하세요.");
+      img.src=e.target.result; preview.style.display="block";
+    }
+  };
+  reader.readAsDataURL(f);
+});
+const savedImage=load("voucher_image");
+if(savedImage){img.src=savedImage;preview.style.display="block";}
+document.getElementById("clearVoucher").addEventListener("click",()=>{
+  localStorage.removeItem(STORE_PREFIX+"voucher_image");
+  fileInput.value="";img.removeAttribute("src");preview.style.display="none";
+});
+document.getElementById("openVoucherLink").addEventListener("click",()=>{
+  const url=document.querySelector('[data-save="voucher_link"]').value.trim();
+  if(!url){alert("바우처 링크를 먼저 입력하세요.");return;}
+  window.location.href=url;
+});
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("./sw.js").catch(function () {});
+  });
+}
+</script>
+
+<script>
+const v8Get=(k,d)=>{try{const v=localStorage.getItem(STORE_PREFIX+'v8_'+k);return v===null?d:JSON.parse(v)}catch{return d}};
+const v8Set=(k,v)=>localStorage.setItem(STORE_PREFIX+'v8_'+k,JSON.stringify(v));
+const defaults=['마카다미아 초콜릿','코나 커피','호놀룰루 쿠키','선물용 과자','생수','간식'];
+function shopping(){return v8Get('shopping',defaults.map(x=>({text:x,done:false})))}
+function renderShopping(){const a=shopping(),el=document.getElementById('shoppingList');el.innerHTML=a.map((x,i)=>`<div class="list-row"><input type="checkbox" data-sc="${i}" ${x.done?'checked':''}><input type="text" data-st="${i}" value="${x.text}"><button class="btn ghost" data-sd="${i}">삭제</button></div>`).join('');document.querySelectorAll('[data-sc]').forEach(e=>e.onchange=()=>{const a=shopping();a[+e.dataset.sc].done=e.checked;v8Set('shopping',a);renderShopping()});document.querySelectorAll('[data-st]').forEach(e=>e.oninput=()=>{const a=shopping();a[+e.dataset.st].text=e.value;v8Set('shopping',a)});document.querySelectorAll('[data-sd]').forEach(e=>e.onclick=()=>{const a=shopping();a.splice(+e.dataset.sd,1);v8Set('shopping',a);renderShopping()})}
+document.getElementById('addShopping').onclick=()=>{const a=shopping();a.push({text:'새 항목',done:false});v8Set('shopping',a);renderShopping()};
+function expenses(){return v8Get('expenses',[])}
+function renderExpenses(){const a=expenses(),rate=+document.getElementById('rateInput').value||1400,total=a.reduce((s,x)=>s+(+x.amount||0),0);document.getElementById('expenseTotal').textContent='$'+total.toFixed(2);document.getElementById('expenseWon').textContent='약 ₩'+Math.round(total*rate).toLocaleString();document.getElementById('expenseList').innerHTML=a.map((x,i)=>`<div class="expense-row"><input data-en="${i}" value="${x.name||''}" placeholder="항목"><input data-ea="${i}" type="number" value="${x.amount||''}" placeholder="$"><button class="btn ghost" data-ed="${i}">삭제</button></div>`).join('');document.querySelectorAll('[data-en]').forEach(e=>e.oninput=()=>{const a=expenses();a[+e.dataset.en].name=e.value;v8Set('expenses',a)});document.querySelectorAll('[data-ea]').forEach(e=>e.oninput=()=>{const a=expenses();a[+e.dataset.ea].amount=e.value;v8Set('expenses',a);renderExpenses()});document.querySelectorAll('[data-ed]').forEach(e=>e.onclick=()=>{const a=expenses();a.splice(+e.dataset.ed,1);v8Set('expenses',a);renderExpenses()})}
+document.getElementById('addExpense').onclick=()=>{const a=expenses();a.push({name:'',amount:''});v8Set('expenses',a);renderExpenses()};
+function calc(){const u=+document.getElementById('usdInput').value||0,r=+document.getElementById('rateInput').value||0;document.getElementById('krwResult').textContent='₩'+Math.round(u*r).toLocaleString();v8Set('rate',r);renderExpenses()}
+document.getElementById('rateInput').value=v8Get('rate',1400);document.getElementById('usdInput').oninput=calc;document.getElementById('rateInput').oninput=calc;
+function parking(){const p=v8Get('parking',null),o=document.getElementById('openParking');if(!p){document.getElementById('parkingStatus').textContent='저장된 위치가 없습니다.';o.classList.add('hidden');return}document.getElementById('parkingStatus').textContent='저장시간: '+new Date(p.time).toLocaleString('ko-KR');o.href=`https://maps.apple.com/?q=${p.lat},${p.lng}`;o.classList.remove('hidden')}
+document.getElementById('saveParking').onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{v8Set('parking',{lat:p.coords.latitude,lng:p.coords.longitude,time:Date.now()});parking()},()=>alert('Safari 위치 권한을 허용하세요.')):alert('위치 기능을 사용할 수 없습니다.');document.getElementById('clearParking').onclick=()=>{localStorage.removeItem(STORE_PREFIX+'v8_parking');parking()};
+const foods=[{"area": "와이키키", "name": "Paia Fish Market Waikiki", "menu": "Mahi Mahi, Blackened Fish, Deep-fried Calamari", "map": "Paia Fish Market Waikiki"}, {"area": "와이키키", "name": "Marugame Udon Waikiki", "menu": "Nikutama Udon, Curry Nikutama Udon, Shrimp Tempura", "map": "Marugame Udon Waikiki"}, {"area": "와이키키", "name": "Musubi Cafe IYASUME", "menu": "Spam Musubi, Eel & Egg Musubi, Avocado Bacon Egg Musubi", "map": "Musubi Cafe Iyasume Waikiki"}, {"area": "와이키키", "name": "Island Vintage Coffee Waikiki", "menu": "Acai Bowl, Island Latte, Hawaiian Honey Latte", "map": "Island Vintage Coffee Waikiki"}, {"area": "와이키키", "name": "Kona Coffee Purveyors", "menu": "퀸아망, 산미 있는 커피", "map": "Kona Coffee Purveyors Waikiki"}, {"area": "와이키키", "name": "Liliha Bakery Waikiki", "menu": "Coco Puff, Apple Cinnamon Roll, Macadamia Nut Bread", "map": "Liliha Bakery Waikiki"}, {"area": "와이키키", "name": "Halekulani Bakery", "menu": "Ham & Cheese Croissant, Pineapple Danish", "map": "Halekulani Bakery"}, {"area": "와이키키", "name": "Eggs 'n Things Waikiki Beach Eggspress", "menu": "Strawberry Pancakes, Eggs Benedict, Loco Moco", "map": "Eggs n Things Waikiki Beach Eggspress"}, {"area": "와이키키", "name": "Heavenly Island Lifestyle", "menu": "Heavenly Plate, Loco Moco, Local Egg Omelette", "map": "Heavenly Island Lifestyle Waikiki"}, {"area": "와이키키", "name": "Yard House Waikiki", "menu": "Poke Nachos, Steak, Lobster Noodles, Happy Hour", "map": "Yard House Waikiki"}, {"area": "와이키키", "name": "Kickin Kajun Honolulu", "menu": "Dungeness Crab Combo, Crawfish, Cajun Seafood", "map": "Kickin Kajun Honolulu"}, {"area": "와이키키", "name": "Poké Bar Waikiki", "menu": "Shoyu Ahi, Salmon, Spicy Tuna Poke Bowl", "map": "Poke Bar Waikiki"}, {"area": "와이키키", "name": "Kai Coffee Hawaii", "menu": "Kai Latte, Signature Coffee", "map": "Kai Coffee Hawaii Waikiki"}, {"area": "카카아코", "name": "Joja Smash Burger", "menu": "Oklahoma Truffle Smash Burger", "map": "Joja Smash Burger Honolulu"}, {"area": "카카아코", "name": "Baker Dudes", "menu": "Macadamia Sticky Bun, Croissant, Ham & Cheese Croissant", "map": "Baker Dudes Honolulu"}, {"area": "카카아코", "name": "Arvo Café", "menu": "Loaded Avocado Toast, Ricotta Toast, Lavender Latte", "map": "Arvo Cafe Honolulu"}, {"area": "카카아코", "name": "Fresh Sugarcane Juice Stand", "menu": "Fresh Sugarcane Juice", "map": "Kakaako Farmers Market"}, {"area": "노스쇼어", "name": "Giovanni's Shrimp Truck", "menu": "Garlic Shrimp, Hot & Spicy Shrimp", "map": "Giovanni's Shrimp Truck Haleiwa"}, {"area": "노스쇼어", "name": "HONOS Shrimp Truck", "menu": "Garlic Shrimp Plate", "map": "HONOS Shrimp Truck Haleiwa"}, {"area": "노스쇼어", "name": "Ray's Kiawe Broiled Chicken", "menu": "Huli Huli Chicken Plate", "map": "Rays Kiawe Broiled Chicken"}, {"area": "노스쇼어", "name": "Kua Aina Sandwich Shop Haleiwa", "menu": "Avocado Burger, Pineapple Burger, Chicken Tender", "map": "Kua Aina Sandwich Shop Haleiwa"}, {"area": "노스쇼어", "name": "Teddy's Bigger Burgers Haleiwa", "menu": "Original Burger Combo, Avocado Burger, Milkshake", "map": "Teddys Bigger Burgers Haleiwa"}, {"area": "노스쇼어", "name": "Matsumoto Shave Ice", "menu": "Rainbow, Tropical Combination, Condensed Milk", "map": "Matsumoto Shave Ice"}, {"area": "노스쇼어", "name": "Haleiwa Bowls", "menu": "Acai Bowl, Smoothie", "map": "Haleiwa Bowls"}, {"area": "노스쇼어", "name": "Ted's Bakery", "menu": "Haupia Pie, Chocolate Haupia Pie, Garlic Shrimp", "map": "Teds Bakery Sunset Beach"}, {"area": "동부·카일루아", "name": "Yummy Huli Huli Chicken", "menu": "Whole Chicken, Rice", "map": "Yummy Huli Huli Chicken"}, {"area": "동부·카일루아", "name": "Ono Steaks and Shrimp Shack", "menu": "Shrimp, Chicken Rib, Steak Plate", "map": "Ono Steaks and Shrimp Shack"}, {"area": "알라모아나", "name": "Goma Tei Ramen", "menu": "Tan Tan Ramen, Shoyu Ramen, Gyoza", "map": "Goma Tei Ramen Ala Moana"}, {"area": "알라모아나", "name": "Shabuya Ala Moana", "menu": "Shabu Shabu Lunch, Dinner Buffet", "map": "Shabuya Ala Moana"}, {"area": "알라모아나", "name": "Foodland Farms Ala Moana", "menu": "Shoyu Ahi Poke, Spicy Ahi Poke, Wasabi Salmon Poke", "map": "Foodland Farms Ala Moana"}, {"area": "진주만·서부", "name": "Monkeypod Kitchen Ko Olina", "menu": "Fish Tacos, Pizza, Mai Tai", "map": "Monkeypod Kitchen Ko Olina"}, {"area": "진주만·서부", "name": "Tropic Poke Ko Olina", "menu": "Poke Bowl, Udon", "map": "Tropic Poke Ko Olina"}, {"area": "와이켈레", "name": "MOOJIGAE Korean Grill", "menu": "Galbi, Bulgogi, Bibimbap", "map": "MOOJIGAE Korean Grill Waikele"}, {"area": "와이켈레", "name": "Yellow Kitchen", "menu": "Spicy Pork, Kimchi Fried Rice", "map": "Yellow Kitchen Waikele"}, {"area": "기타", "name": "Fook Yuen Seafood Restaurant", "menu": "Lobster, Seafood Fried Rice, Dim Sum", "map": "Fook Yuen Seafood Restaurant Honolulu"}, {"area": "기타", "name": "Leonard's Bakery", "menu": "Malasada", "map": "Leonards Bakery Honolulu"}, {"area": "기타", "name": "Leonard's Malasadamobile Wagon", "menu": "Malasada", "map": "Leonards Malasadamobile Wagon Waikele"}, {"area": "기타", "name": "Honolulu Cookie Company", "menu": "Pineapple-shaped Shortbread Cookies", "map": "Honolulu Cookie Company Waikiki"}];
+
+function album(){return v8Get('album',[])}function renderAlbum(){document.getElementById('albumGrid').innerHTML=album().map(x=>`<img src="${x}">`).join('')}document.getElementById('albumFile').onchange=()=>{[...document.getElementById('albumFile').files].slice(0,6).forEach(f=>{const r=new FileReader();r.onload=e=>{const a=album();a.push(e.target.result);try{v8Set('album',a);renderAlbum()}catch{alert('저장 공간이 부족합니다.')}};r.readAsDataURL(f)})};document.getElementById('clearAlbum').onclick=()=>{localStorage.removeItem(STORE_PREFIX+'v8_album');renderAlbum()};
+
+const travelDates = [
+  {label:'9월 4일 (금)', selector:'day0'},
+  {label:'9월 5일 (토)', selector:'day1'},
+  {label:'9월 6일 (일)', selector:'day2'},
+  {label:'9월 7일 (월)', selector:'day3'},
+  {label:'9월 8일 (화)', selector:'day4'},
+  {label:'9월 9일 (수)', selector:'day5'},
+  {label:'9월 10일 (목)', selector:'day6'},
+  {label:'9월 11일 (금)', selector:'day7'},
+  {label:'9월 12일 (토)', selector:'day8'}
+];
+
+function getSelectedDayIndex(){
+  const checked=document.querySelector('.day-radio:checked');
+  if(!checked) return 0;
+  const m=checked.id.match(/day(\d+)/);
+  return m ? Number(m[1]) : 0;
+}
+
+function getPanelItems(dayIndex){
+  const panel=document.querySelector('.panel-'+dayIndex);
+  if(!panel) return [];
+  return [...panel.querySelectorAll('.item')].map(item=>({
+    time:(item.querySelector('.time')?.textContent||'').trim(),
+    place:(item.querySelector('.place')?.textContent||'').trim(),
+    note:(item.querySelector('.note')?.textContent||'').trim(),
+    map:item.querySelector('.map-btn')?.getAttribute('href')||''
+  }));
+}
+
+function parseStartMinutes(text){
+  const m=(text||'').match(/(\d{1,2}):(\d{2})/);
+  return m ? (Number(m[1])*60+Number(m[2])) : null;
+}
+
+function honoluluNow(){
+  const parts=new Intl.DateTimeFormat('en-CA',{
+    timeZone:'Pacific/Honolulu',
+    year:'numeric',month:'2-digit',day:'2-digit',
+    hour:'2-digit',minute:'2-digit',hour12:false
+  }).formatToParts(new Date());
+  const obj={};
+  parts.forEach(p=>obj[p.type]=p.value);
+  return {
+    date:`${obj.year}-${obj.month}-${obj.day}`,
+    hours:Number(obj.hour),
+    minutes:Number(obj.minute),
+    text:`${obj.hour}:${obj.minute}`
+  };
+}
+
+function updateHomeDashboard(){
+  const HAWAII_TZ=getTripSettings().timezone||'Pacific/Honolulu';
+  const KOREA_TZ='Asia/Seoul';
+  const now=new Date();
+
+  const clockFormat=(tz)=>new Intl.DateTimeFormat('ko-KR',{
+    timeZone:tz,hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
+  }).format(now);
+  const dateFormat=(tz)=>new Intl.DateTimeFormat('ko-KR',{
+    timeZone:tz,year:'numeric',month:'2-digit',day:'2-digit',weekday:'short'
+  }).format(now);
+
+  const hwClock=document.getElementById('hawaiiClock');
+  const hwDate=document.getElementById('hawaiiDate');
+  const krClock=document.getElementById('koreaClock');
+  const krDate=document.getElementById('koreaDate');
+  if(hwClock) hwClock.textContent=clockFormat(HAWAII_TZ);
+  if(hwDate) hwDate.textContent=dateFormat(HAWAII_TZ);
+  if(krClock) krClock.textContent=clockFormat(KOREA_TZ);
+  if(krDate) krDate.textContent=dateFormat(KOREA_TZ);
+
+  const dayIndex=getSelectedDayIndex();
+  const selected=travelDates[dayIndex]||travelDates[0];
+  const selectedDayEl=document.getElementById('homeSelectedDay');
+  if(selectedDayEl) selectedDayEl.textContent=selected.label;
+
+  const panel=document.querySelector('.panel-'+dayIndex);
+  if(!panel) return;
+  const articles=[...panel.querySelectorAll('.item')];
+  if(!articles.length) return;
+
+  function firstTime(text){
+    const m=String(text||'').match(/(\d{1,2}):(\d{2})/);
+    return m ? {hour:Number(m[1]),minute:Number(m[2])} : null;
+  }
+
+  function eventInfo(article,itemIndex){
+    const timeText=article.querySelector('.time')?.textContent.trim()||'';
+    const place=article.querySelector('.place')?.textContent.trim()||'';
+    const note=article.querySelector('.note')?.textContent.trim()||'';
+    const map=article.querySelector('a[href]')?.href||'#';
+    const tm=firstTime(timeText);
+    if(!tm) return null;
+
+    const day=4+dayIndex;
+    const isKorea=(dayIndex===0 && itemIndex<=1) || /인천/.test(place);
+    const zone=isKorea ? 'Asia/Seoul' : 'Pacific/Honolulu';
+    const zoneLabel=isKorea ? '한국시간(KST)' : '하와이시간(HST)';
+    const utcHour=isKorea ? tm.hour-9 : tm.hour+10;
+    const instant=new Date(Date.UTC(2026,8,day,utcHour,tm.minute,0));
+
+    return {timeText,place,note,map,instant,zone,zoneLabel};
+  }
+
+  const events=articles.map(eventInfo).filter(Boolean).sort((a,b)=>a.instant-b.instant);
+  const chosen=events.find(e=>e.instant>now);
+
+  const nextTime=document.getElementById('nextTime');
+  const nextPlace=document.getElementById('nextPlace');
+  const nextZone=document.getElementById('nextTimeZone');
+  const countdown=document.getElementById('countdownText');
+  const countdownDate=document.getElementById('nextEventDateTime');
+  const countdownBox=document.getElementById('countdownBox');
+  const badge=document.getElementById('countdownBadge');
+  const nextTitle=document.getElementById('nextActionTitle');
+  const nextNote=document.getElementById('nextActionNote');
+  const g=document.getElementById('nextGoogle');
+  const a=document.getElementById('nextApple');
+
+  if(!chosen){
+    if(nextTime) nextTime.textContent='일정 완료';
+    if(nextPlace) nextPlace.textContent='선택한 날짜의 일정이 모두 지났습니다.';
+    if(nextZone) nextZone.textContent='';
+    if(countdown) countdown.textContent='완료';
+    if(countdownDate) countdownDate.textContent=selected.label;
+    if(nextTitle) nextTitle.textContent='선택한 날짜 일정 완료';
+    if(nextNote) nextNote.textContent='전체 일정에서 다른 날짜를 선택해 주세요.';
+    if(countdownBox) countdownBox.className='schedule-summary-box countdown-box';
+    if(badge){badge.textContent='완료';badge.className='status-badge done';}
+    return;
+  }
+
+  const totalMinutes=Math.max(0,Math.floor((chosen.instant-now)/60000));
+  const days=Math.floor(totalMinutes/1440);
+  const hours=Math.floor((totalMinutes%1440)/60);
+  const minutes=totalMinutes%60;
+  const remaining=days>0 ? `${days}일 ${hours}시간 ${minutes}분`
+    : hours>0 ? `${hours}시간 ${minutes}분` : `${minutes}분`;
+
+  const eventDateText=new Intl.DateTimeFormat('ko-KR',{
+    timeZone:chosen.zone,year:'numeric',month:'2-digit',day:'2-digit',
+    weekday:'short',hour:'2-digit',minute:'2-digit',hour12:false
+  }).format(chosen.instant);
+
+  if(nextTime) nextTime.textContent=chosen.timeText;
+  if(nextPlace) nextPlace.textContent=chosen.place;
+  if(nextZone) nextZone.textContent=chosen.zoneLabel;
+  if(countdown) countdown.textContent=remaining+' 남음';
+  if(countdownDate) countdownDate.textContent=eventDateText+' · '+chosen.zoneLabel;
+  if(nextTitle) nextTitle.textContent=chosen.place;
+  if(nextNote) nextNote.textContent=chosen.note||'';
+  if(g) g.href=chosen.map||'#';
+  if(a) a.href='https://maps.apple.com/?q='+encodeURIComponent(chosen.place);
+
+  const level=totalMinutes<=5?'urgent':totalMinutes<=30?'soon':'normal';
+  if(countdownBox) countdownBox.className='schedule-summary-box countdown-box '+level;
+  if(badge){
+    badge.textContent=level==='urgent'?'곧 시작':level==='soon'?'30분 이내':'예정';
+    badge.className='status-badge '+(level==='normal'?'':level);
+  }
+}
+
+document.querySelectorAll('.day-radio').forEach(r=>{
+  r.addEventListener('change',updateHomeDashboard);
+});
+
+const goScheduleBtn=document.getElementById('goScheduleBtn');
+if(goScheduleBtn){
+  goScheduleBtn.addEventListener('click',()=>{
+    const btn=document.querySelector('.bottom button[data-page="schedule"]');
+    if(btn) btn.click();
+  });
+}
+
+updateHomeDashboard();
+setInterval(updateHomeDashboard,1000);
+
+renderShopping();renderExpenses();calc();parking();renderAlbum();
+</script>
+
+<script>
+/* v11.0 feature set */
+function safeGet(key, fallback){
+  try{const v=localStorage.getItem(STORE_PREFIX+key);return v===null?fallback:JSON.parse(v)}catch(e){return fallback}
+}
+function safeSet(key,val){localStorage.setItem(STORE_PREFIX+key,JSON.stringify(val))}
+
+/* 준비물 */
+const baseChecklist=["여권","국제운전면허증","항공권·호텔 바우처","보조배터리","충전기·멀티어댑터","수영복","아쿠아슈즈","스노클 장비","선크림","모자·선글라스","상비약","방수팩"];
+function getChecklist(){return safeGet("checklist_v10",baseChecklist.map((text,i)=>({id:"b"+i,text,done:false})))}
+function renderChecklistV10(){
+  const items=getChecklist(),root=document.getElementById("checklist");
+  if(!root)return;
+  root.innerHTML=items.map((x,i)=>`<div class="check-row">
+    <input type="checkbox" data-cdone="${i}" ${x.done?"checked":""}>
+    <input type="text" data-ctext="${i}" value="${String(x.text).replace(/"/g,"&quot;")}">
+    <button type="button" class="btn ghost" data-cdel="${i}">삭제</button>
+  </div>`).join("");
+  root.querySelectorAll("[data-cdone]").forEach(e=>e.onchange=()=>{const a=getChecklist();a[+e.dataset.cdone].done=e.checked;safeSet("checklist_v10",a)});
+  root.querySelectorAll("[data-ctext]").forEach(e=>e.oninput=()=>{const a=getChecklist();a[+e.dataset.ctext].text=e.value;safeSet("checklist_v10",a)});
+  root.querySelectorAll("[data-cdel]").forEach(e=>e.onclick=()=>{const a=getChecklist();a.splice(+e.dataset.cdel,1);safeSet("checklist_v10",a);renderChecklistV10()});
+}
+document.getElementById("addChecklistItem")?.addEventListener("click",()=>{
+  const text=prompt("추가할 준비물을 입력하세요.");
+  if(!text||!text.trim())return;
+  const a=getChecklist();a.push({id:"u"+Date.now(),text:text.trim(),done:false});safeSet("checklist_v10",a);renderChecklistV10();
+});
+renderChecklistV10();
+
+/* 맛집 */
+function getUserFoods(){return safeGet("user_foods_v10",[])}
+function getFoodState(){return safeGet("food_state_v10",{})}
+function allFoodItems(){return foods.map((x,i)=>({...x,id:"base_"+i,custom:false})).concat(getUserFoods().map(x=>({...x,custom:true})))}
+function foodUrl(x){const m=(x.map||x.name||"").trim();return /^https?:\/\//i.test(m)?m:"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(m)}
+function renderFoodsV10(){
+  const root=document.getElementById("foodList");if(!root)return;
+  const q=(document.getElementById("foodSearch")?.value||"").trim().toLowerCase(),state=getFoodState();
+  const list=allFoodItems().filter(x=>(`${x.area} ${x.name} ${x.menu}`).toLowerCase().includes(q));
+  document.getElementById("foodSummary").textContent=`${list.length}/${allFoodItems().length}곳`;
+  root.innerHTML=list.map(x=>{const s=state[x.id]||{};return `<div class="food-card">
+    <div style="display:flex;justify-content:space-between;gap:8px">
+      <div><span class="pill">${x.area||"기타"}</span><div style="font-weight:900;margin-top:6px">${x.name}</div><div class="note">${x.menu||""}</div></div>
+      <button type="button" class="btn ghost" data-ffav="${x.id}">${s.favorite?"★":"☆"}</button>
+    </div>
+    <div class="food-meta" style="margin-top:9px">
+      <label class="field"><span>평점</span><select data-frate="${x.id}"><option value="">미정</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${String(s.rating||"")===String(n)?"selected":""}>${"★".repeat(n)}</option>`).join("")}</select></label>
+      <label class="done-label" style="align-self:end;padding:10px 0"><input type="checkbox" data-fvisit="${x.id}" ${s.visited?"checked":""}> 방문 완료</label>
+    </div>
+    <label class="field" style="margin-top:8px"><span>메모</span><textarea data-fnote="${x.id}" placeholder="주문 메뉴나 후기를 기록하세요.">${s.note||""}</textarea></label>
+    <div class="inline-actions"><a class="btn secondary" href="${foodUrl(x)}">지도</a>${x.custom?`<button type="button" class="btn ghost" data-fedit="${x.id}">수정</button><button type="button" class="btn ghost" data-fdel="${x.id}">삭제</button>`:""}</div>
+  </div>`}).join("");
+  root.querySelectorAll("[data-ffav]").forEach(e=>e.onclick=()=>{const s=getFoodState(),id=e.dataset.ffav;s[id]={...(s[id]||{}),favorite:!s[id]?.favorite};safeSet("food_state_v10",s);renderFoodsV10()});
+  root.querySelectorAll("[data-frate]").forEach(e=>e.onchange=()=>{const s=getFoodState(),id=e.dataset.frate;s[id]={...(s[id]||{}),rating:e.value};safeSet("food_state_v10",s)});
+  root.querySelectorAll("[data-fvisit]").forEach(e=>e.onchange=()=>{const s=getFoodState(),id=e.dataset.fvisit;s[id]={...(s[id]||{}),visited:e.checked};safeSet("food_state_v10",s)});
+  root.querySelectorAll("[data-fnote]").forEach(e=>e.oninput=()=>{const s=getFoodState(),id=e.dataset.fnote;s[id]={...(s[id]||{}),note:e.value};safeSet("food_state_v10",s)});
+  root.querySelectorAll("[data-fdel]").forEach(e=>e.onclick=()=>{safeSet("user_foods_v10",getUserFoods().filter(x=>x.id!==e.dataset.fdel));renderFoodsV10()});
+  root.querySelectorAll("[data-fedit]").forEach(e=>e.onclick=()=>{const a=getUserFoods(),x=a.find(v=>v.id===e.dataset.fedit);if(!x)return;const n=prompt("맛집명",x.name);if(n===null)return;x.name=n.trim()||x.name;x.area=(prompt("지역",x.area)||x.area).trim();x.menu=(prompt("추천 메뉴",x.menu)||x.menu).trim();x.map=(prompt("지도 검색어 또는 링크",x.map)||x.map).trim();safeSet("user_foods_v10",a);renderFoodsV10()});
+}
+document.getElementById("addFoodBtn")?.addEventListener("click",()=>{
+  const area=document.getElementById("foodAreaInput").value.trim()||"기타";
+  const name=document.getElementById("foodNameInput").value.trim();
+  const menu=document.getElementById("foodMenuInput").value.trim();
+  const map=document.getElementById("foodMapInput").value.trim()||name;
+  if(!name){alert("맛집명을 입력하세요.");return}
+  const a=getUserFoods();a.push({id:"user_"+Date.now(),area,name,menu,map});safeSet("user_foods_v10",a);
+  ["foodAreaInput","foodNameInput","foodMenuInput","foodMapInput"].forEach(id=>document.getElementById(id).value="");
+  renderFoodsV10();
+});
+document.getElementById("foodSearch")?.addEventListener("input",renderFoodsV10);
+renderFoodsV10();
+
+/* 현지 영어 */
+const phrases=[
+["기본","저는 영어를 잘하지 못합니다.","I don't speak English well."],["기본","천천히 말씀해 주세요.","Could you please speak more slowly?"],["기본","다시 말씀해 주세요.","Could you say that again, please?"],
+["공항","체크인은 어디에서 하나요?","Where is the check-in counter?"],["공항","탑승구가 어디인가요?","Where is the boarding gate?"],["입국","관광 목적으로 왔습니다.","I'm here for vacation."],["입국","9일 동안 머무를 예정입니다.","I'll be staying for nine days."],
+["렌터카","예약한 차량을 찾으러 왔습니다.","I'm here to pick up my rental car."],["렌터카","차량에 문제가 있습니다.","There is something wrong with the car."],["렌터카","보험 적용이 되나요?","Is this covered by insurance?"],["렌터카","차량을 어디에 반납하나요?","Where should I return the car?"],
+["호텔","예약했습니다.","I have a reservation."],["호텔","체크인하고 싶습니다.","I'd like to check in."],["호텔","수건을 더 받을 수 있나요?","Could we have some extra towels?"],["호텔","체크아웃 시간을 늦출 수 있나요?","Is late check-out available?"],
+["식당","네 명 자리 부탁드립니다.","A table for four, please."],["식당","창가 자리로 부탁드립니다.","Could we have a table by the window, please?"],["식당","추천 메뉴가 무엇인가요?","What do you recommend?"],["식당","이것으로 주문하겠습니다.","I'd like to order this."],["식당","맵지 않게 해 주세요.","Please make it not spicy."],["식당","포장해 주세요.","Can I get this to go, please?"],["식당","계산서 부탁드립니다.","Could we have the check, please?"],["식당","팁이 포함되어 있나요?","Is gratuity included?"],
+["쇼핑","이것은 얼마인가요?","How much is this?"],["쇼핑","다른 사이즈가 있나요?","Do you have this in another size?"],["쇼핑","입어봐도 되나요?","Can I try this on?"],["결제","카드로 결제하겠습니다.","I'll pay by card."],["결제","영수증을 받을 수 있나요?","Could I get a receipt?"],
+["길찾기","화장실이 어디인가요?","Where is the restroom?"],["길찾기","여기에서 얼마나 걸리나요?","How long does it take from here?"],["관광","사진을 찍어 주시겠어요?","Could you take a picture for us?"],["관광","예약 확인 부탁드립니다.","Could you check my reservation?"],
+["응급","도와주세요.","Please help me."],["응급","구급차를 불러 주세요.","Please call an ambulance."],["응급","경찰을 불러 주세요.","Please call the police."],["응급","병원이 필요합니다.","I need a hospital."],["응급","여권을 잃어버렸습니다.","I lost my passport."],["응급","아이를 잃어버렸습니다.","My child is missing."]
+].map((x,i)=>({id:"p"+i,cat:x[0],ko:x[1],en:x[2]}));
+let currentCat="전체";
+function favPhrases(){return safeGet("phrase_favs_v10",[])}
+function speak(text,lang="en-US"){if(!("speechSynthesis" in window)){alert("음성 읽기를 지원하지 않습니다.");return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=.88;speechSynthesis.speak(u)}
+function phraseCard(p){const fav=favPhrases().includes(p.id);return `<div class="phrase-card"><div class="phrase-ko">${p.ko}</div><div class="phrase-en">${p.en}</div><div class="phrase-actions"><button class="btn" data-ps="${p.id}">🔊 읽기</button><button class="btn secondary" data-pc="${p.id}">복사</button><button class="btn ghost" data-pb="${p.id}">크게 보기</button><button class="btn ghost" data-pf="${p.id}">${fav?"★":"☆"}</button></div></div>`}
+function bindPhrase(root){
+ root.querySelectorAll("[data-ps]").forEach(e=>e.onclick=()=>speak(phrases.find(p=>p.id===e.dataset.ps).en));
+ root.querySelectorAll("[data-pc]").forEach(e=>e.onclick=()=>{const t=phrases.find(p=>p.id===e.dataset.pc).en;navigator.clipboard?.writeText(t).then(()=>alert("복사했습니다.")).catch(()=>prompt("복사하세요.",t))});
+ root.querySelectorAll("[data-pb]").forEach(e=>e.onclick=()=>{const p=phrases.find(p=>p.id===e.dataset.pb);document.getElementById("bigEnglish").textContent=p.en;document.getElementById("bigKorean").textContent=p.ko;document.getElementById("bigOverlay").classList.add("show");document.getElementById("bigSpeak").onclick=()=>speak(p.en)});
+ root.querySelectorAll("[data-pf]").forEach(e=>e.onclick=()=>{const a=favPhrases(),id=e.dataset.pf,i=a.indexOf(id);i>=0?a.splice(i,1):a.push(id);safeSet("phrase_favs_v10",a);renderPhrases()});
+}
+function renderCategories(){const cats=["전체",...new Set(phrases.map(p=>p.cat))];const r=document.getElementById("phraseCategories");if(!r)return;r.innerHTML=cats.map(c=>`<button class="${c===currentCat?"active":""}" data-cat="${c}">${c}</button>`).join("");r.querySelectorAll("[data-cat]").forEach(e=>e.onclick=()=>{currentCat=e.dataset.cat;renderCategories();renderPhrases()})}
+function renderPhrases(){const q=(document.getElementById("phraseSearch")?.value||"").toLowerCase();const list=phrases.filter(p=>(currentCat==="전체"||p.cat===currentCat)&&(p.ko+" "+p.en).toLowerCase().includes(q));const r=document.getElementById("phraseList");if(!r)return;r.innerHTML=list.map(phraseCard).join("");document.getElementById("phraseCount").textContent=list.length+"개";const fav=phrases.filter(p=>favPhrases().includes(p.id)),fr=document.getElementById("favoritePhrases");fr.innerHTML=fav.length?fav.map(phraseCard).join(""):"즐겨찾기한 문장이 없습니다.";document.getElementById("favoriteCount").textContent=fav.length+"개";bindPhrase(r);bindPhrase(fr)}
+document.getElementById("phraseSearch")?.addEventListener("input",renderPhrases);
+document.getElementById("bigClose")?.addEventListener("click",()=>document.getElementById("bigOverlay").classList.remove("show"));
+document.getElementById("bigOverlay")?.addEventListener("click",e=>{if(e.target.id==="bigOverlay")e.currentTarget.classList.remove("show")});
+
+document.getElementById("speakKorean")?.addEventListener("click",()=>{const t=document.getElementById("translateInput").value.trim();if(t)speak(t,"ko-KR")});
+renderCategories();renderPhrases();
+</script>
+
+
+<script>
+/* 새 버전 즉시 반영 */
+if("serviceWorker" in navigator){
+  window.addEventListener("load",async()=>{
+    try{
+      const regs=await navigator.serviceWorker.getRegistrations();
+      for(const reg of regs){await reg.update();}
+    }catch(e){}
+  });
+}
+</script>
+
+
+<script>
+/* v11 양방향 통역 */
+(function(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const support = document.getElementById("interpreterSupport");
+  const enBox = document.getElementById("heardEnglish");
+  const koBox = document.getElementById("spokenKorean");
+  const enBtn = document.getElementById("listenEnglishBtn");
+  const koBtn = document.getElementById("listenKoreanBtn");
+
+  let activeRecognition = null;
+  let activeButton = null;
+
+  function getLog(){
+    try{return JSON.parse(localStorage.getItem(STORE_PREFIX+"interpreter_log")||"[]")}catch(e){return []}
+  }
+  function saveLog(items){
+    localStorage.setItem(STORE_PREFIX+"interpreter_log",JSON.stringify(items.slice(0,30)));
+  }
+  function addLog(who,text){
+    if(!text || !text.trim()) return;
+    const items=getLog();
+    items.unshift({who,text:text.trim(),time:new Date().toISOString()});
+    saveLog(items);
+    renderLog();
+  }
+  function renderLog(){
+    const root=document.getElementById("conversationLog");
+    if(!root)return;
+    const items=getLog();
+    root.innerHTML=items.length?items.map(x=>{
+      const d=new Date(x.time);
+      return `<div class="log-item"><div class="who">${x.who} · ${d.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})}</div><div>${x.text}</div></div>`;
+    }).join(""):"기록이 없습니다.";
+  }
+  function stopRecognition(){
+    try{activeRecognition?.stop()}catch(e){}
+    if(activeButton) activeButton.classList.remove("listening");
+    activeRecognition=null;
+    activeButton=null;
+  }
+  function listen(lang,target,button,who){
+    if(!SpeechRecognition){
+      alert("이 브라우저에서는 음성 인식을 지원하지 않습니다. Google 번역 또는 ChatGPT 음성을 이용해 주세요.");
+      return;
+    }
+    stopRecognition();
+    const rec=new SpeechRecognition();
+    rec.lang=lang;
+    rec.interimResults=true;
+    rec.continuous=false;
+    rec.maxAlternatives=1;
+    activeRecognition=rec;
+    activeButton=button;
+    let finalText="";
+    button.classList.add("listening");
+    button.textContent="⏹ 듣는 중… 다시 누르면 중지";
+    target.textContent="듣고 있습니다…";
+
+    rec.onresult=(event)=>{
+      let interim="";
+      for(let i=event.resultIndex;i<event.results.length;i++){
+        const t=event.results[i][0].transcript;
+        if(event.results[i].isFinal) finalText+=t;
+        else interim+=t;
+      }
+      target.textContent=(finalText||interim||"듣고 있습니다…").trim();
+    };
+    rec.onerror=(event)=>{
+      const msg={
+        "not-allowed":"마이크 사용 권한이 허용되지 않았습니다.",
+        "no-speech":"음성이 들리지 않았습니다. 다시 시도해 주세요.",
+        "network":"음성 인식 네트워크 오류가 발생했습니다.",
+        "audio-capture":"마이크를 사용할 수 없습니다."
+      }[event.error]||("음성 인식 오류: "+event.error);
+      target.textContent=msg;
+    };
+    rec.onend=()=>{
+      button.classList.remove("listening");
+      button.textContent=lang==="en-US"?"🎤 영어 듣기":"🎤 한국어 말하기";
+      const text=target.textContent.trim();
+      if(text && !text.includes("듣고") && !text.includes("오류") && !text.includes("권한") && !text.includes("들리지")){
+        addLog(who,text);
+      }
+      activeRecognition=null;
+      activeButton=null;
+    };
+    rec.start();
+  }
+
+  if(support){
+    support.textContent=SpeechRecognition
+      ?"✅ 이 브라우저에서 음성 인식을 사용할 수 있습니다. 최초 사용 시 마이크 권한을 허용하세요."
+      :"⚠️ 현재 브라우저에서 음성 인식이 지원되지 않습니다. 아래 Google 번역 또는 ChatGPT 음성을 사용하세요.";
+  }
+
+  enBtn?.addEventListener("click",()=>{
+    if(activeRecognition && activeButton===enBtn){stopRecognition();return;}
+    listen("en-US",enBox,enBtn,"상대방 영어");
+  });
+  koBtn?.addEventListener("click",()=>{
+    if(activeRecognition && activeButton===koBtn){stopRecognition();return;}
+    listen("ko-KR",koBox,koBtn,"내 한국어");
+  });
+
+  
+  
+  document.getElementById("copyEnglishBtn")?.addEventListener("click",()=>{
+    const t=enBox.textContent.trim();
+    navigator.clipboard?.writeText(t).then(()=>alert("복사했습니다.")).catch(()=>prompt("복사하세요.",t));
+  });
+  
+  document.getElementById("clearEnglishBtn")?.addEventListener("click",()=>enBox.textContent="영어 듣기 버튼을 누른 뒤 상대방에게 말해 달라고 하세요.");
+  document.getElementById("clearKoreanBtn")?.addEventListener("click",()=>koBox.textContent="한국어 말하기 버튼을 누르고 하고 싶은 말을 말하세요.");
+  document.getElementById("clearConversationLog")?.addEventListener("click",()=>{
+    if(confirm("통역 대화 기록을 모두 삭제할까요?")){
+      localStorage.removeItem(STORE_PREFIX+"interpreter_log");
+      renderLog();
+    }
+  });
+
+  const quick=[
+    ["천천히 말씀해 주세요.","Could you please speak more slowly?"],
+    ["다시 말씀해 주세요.","Could you say that again, please?"],
+    ["휴대폰에 적어 주세요.","Could you type it on my phone, please?"],
+    ["잠시만 기다려 주세요.","Please wait a moment."],
+    ["번역기를 사용하겠습니다.","I will use a translator."],
+    ["이해했습니다. 감사합니다.","I understand. Thank you."],
+    ["잘 이해하지 못했습니다.","I’m sorry, I didn’t understand."],
+    ["이 화면을 봐 주세요.","Please look at this screen."]
+  ];
+  const qr=document.getElementById("quickResponses");
+  if(qr){
+    qr.innerHTML=quick.map((x,i)=>`<button type="button" class="btn secondary" data-quick="${i}"><b>${x[0]}</b><br><span style="font-size:12px">${x[1]}</span></button>`).join("");
+    qr.querySelectorAll("[data-quick]").forEach(b=>b.onclick=()=>{
+      const x=quick[+b.dataset.quick];
+      document.getElementById("bigEnglish").textContent=x[1];
+      document.getElementById("bigKorean").textContent=x[0];
+      document.getElementById("bigOverlay").classList.add("show");
+      document.getElementById("bigSpeak").onclick=()=>speak(x[1],"en-US");
+      addLog("빠른 응답",x[1]);
+    });
+  }
+  renderLog();
+})();
+</script>
+
+
+<script>
+/* v13 GPT 기반 AI 통역 */
+(function(){
+  const cfg = window.HAWAII_CONFIG || {};
+  const apiState = document.getElementById("translationApiState");
+  const apiError = document.getElementById("translationApiError");
+  const autoTranslate = document.getElementById("autoTranslateToggle");
+  const autoSpeak = document.getElementById("autoSpeakToggle");
+  const styleSelect = document.getElementById("translationStyle");
+  const useContext = document.getElementById("useContextToggle");
+
+  const settings = (() => {
+    try { return JSON.parse(localStorage.getItem(STORE_PREFIX+"translation_settings") || "{}"); }
+    catch(e) { return {}; }
+  })();
+  if(autoTranslate) autoTranslate.checked = settings.autoTranslate !== false;
+  if(autoSpeak) autoSpeak.checked = settings.autoSpeak === true;
+  if(useContext) useContext.checked = settings.useContext !== false;
+  if(styleSelect && settings.style) styleSelect.value = settings.style;
+
+  function saveSettings(){
+    localStorage.setItem(STORE_PREFIX+"translation_settings", JSON.stringify({
+      autoTranslate: !!autoTranslate?.checked,
+      autoSpeak: !!autoSpeak?.checked,
+      useContext: !!useContext?.checked,
+      style: styleSelect?.value || "natural"
+    }));
+  }
+  [autoTranslate,autoSpeak,useContext,styleSelect].forEach(x=>x?.addEventListener("change",saveSettings));
+
+  function setApiState(ok, message){
+    if(!apiState) return;
+    apiState.innerHTML = `<span class="api-dot ${ok ? "ok" : "bad"}"></span>${message}`;
+  }
+  function showApiError(message){
+    if(!apiError) return;
+    apiError.textContent = message;
+    apiError.classList.toggle("hidden", !message);
+  }
+  function endpoint(){
+    return String(cfg.supabaseFunctionUrl || "").trim();
+  }
+  function recentContext(){
+    if(!useContext?.checked) return [];
+    try{
+      const items=JSON.parse(localStorage.getItem(STORE_PREFIX+"interpreter_log")||"[]");
+      return items.slice(0,6).reverse().map(x=>({speaker:x.who,text:x.text}));
+    }catch(e){return []}
+  }
+  async function translateText(text, source, target){
+    if(!text?.trim()) throw new Error("번역할 문장이 없습니다.");
+    if(!endpoint()){
+      throw new Error("config.js에 Supabase Edge Function 주소를 설정해야 합니다.");
+    }
+    const response = await fetch(endpoint(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(cfg.supabaseAnonKey ? {"apikey": cfg.supabaseAnonKey, "Authorization": "Bearer " + cfg.supabaseAnonKey} : {})
+      },
+      body: JSON.stringify({
+        text: text.trim(),
+        source,
+        target,
+        style: styleSelect?.value || "natural",
+        context: recentContext()
+      })
+    });
+    let data = {};
+    try { data = await response.json(); } catch(e) {}
+    if(!response.ok) throw new Error(data.error || `GPT 통역 서버 오류 (${response.status})`);
+    if(!data.translatedText) throw new Error("GPT 번역 결과가 없습니다.");
+    return data.translatedText;
+  }
+  async function runTranslation(opts){
+    const {text, source, target, wrap, output, speakResult=false} = opts;
+    wrap?.classList.remove("hidden");
+    wrap?.classList.add("loading");
+    output.textContent = "GPT가 통역하는 중…";
+    showApiError("");
+    try{
+      const result = await translateText(text, source, target);
+      output.textContent = result;
+      setApiState(true, "GPT 연결됨");
+      
+      return result;
+    }catch(err){
+      output.textContent = "통역 실패: " + (err?.message || "알 수 없는 오류");
+      setApiState(false, "연결 필요");
+      showApiError(err.message);
+      throw err;
+    }finally{
+      wrap?.classList.remove("loading");
+    }
+  }
+
+  const enBox = document.getElementById("heardEnglish");
+  const koBox = document.getElementById("spokenKorean");
+  const enWrap = document.getElementById("englishTranslationWrap");
+  const koWrap = document.getElementById("koreanTranslationWrap");
+  const enOut = document.getElementById("englishTranslation");
+  const koOut = document.getElementById("koreanTranslation");
+
+  document.getElementById("translateEnglishBtn")?.addEventListener("click", async()=>{
+    const t=enBox.textContent.trim();
+    if(!t || t.includes("버튼을 누른")){alert("먼저 상대방의 영어를 인식하세요.");return;}
+    try{await runTranslation({text:t,source:"en",target:"ko",wrap:enWrap,output:enOut});}catch(e){}
+  });
+  document.getElementById("translateKoreanBtn")?.addEventListener("click", async()=>{
+    const t=koBox.textContent.trim();
+    if(!t || t.includes("버튼을 누르고")){alert("먼저 한국어로 말하세요.");return;}
+    try{await runTranslation({text:t,source:"ko",target:"en",wrap:koWrap,output:koOut,speakResult:false});}catch(e){}
+  });
+  document.getElementById("speakTranslatedEnglishBtn")?.addEventListener("click",()=>{
+    const t=koOut?.textContent.trim();
+    if(t && !t.includes("통역") && t!=="통역 실패") speak(t,"en-US");
+    else alert("먼저 영어 통역을 실행하세요.");
+  });
+  document.getElementById("clearEnglishBtn")?.addEventListener("click",()=>enWrap?.classList.add("hidden"));
+  document.getElementById("clearKoreanBtn")?.addEventListener("click",()=>koWrap?.classList.add("hidden"));
+
+  document.getElementById("openTranslate")?.addEventListener("click", async()=>{
+    const input=document.getElementById("translateInput");
+    const wrap=document.getElementById("freeTranslationWrap");
+    const out=document.getElementById("freeTranslationResult");
+    const t=input.value.trim();
+    if(!t){alert("번역할 문장을 입력하세요.");return;}
+    try{await runTranslation({text:t,source:"ko",target:"en",wrap,output:out,speakResult:false});}catch(e){}
+  });
+
+  function autoObserve(element, lang){
+    if(!element) return;
+    let timer=null, last="";
+    new MutationObserver(()=>{
+      clearTimeout(timer);
+      timer=setTimeout(()=>{
+        const text=element.textContent.trim();
+        if(!autoTranslate?.checked || !text || text===last || text.includes("듣고") || text.includes("버튼을") || text.includes("오류") || text.includes("권한")) return;
+        last=text;
+        if(lang==="en"){
+          runTranslation({text,source:"en",target:"ko",wrap:enWrap,output:enOut}).catch(()=>{});
+        }else{
+          runTranslation({text,source:"ko",target:"en",wrap:koWrap,output:koOut,speakResult:false}).catch(()=>{});
+        }
+      },700);
+    }).observe(element,{childList:true,characterData:true,subtree:true});
+  }
+  autoObserve(enBox,"en");
+  autoObserve(koBox,"ko");
+
+  document.getElementById("testTranslationApi")?.addEventListener("click", async()=>{
+    showApiError("");
+    setApiState(false,"GPT 테스트 중");
+    try{
+      const r=await translateText("Hello, I have a reservation.","en","ko");
+      setApiState(true,"GPT 정상 연결");
+      alert("GPT 통역 서버 연결 성공: "+r);
+    }catch(err){
+      setApiState(false,"연결 실패");
+      showApiError(err.message);
+    }
+  });
+
+  if(endpoint()) setApiState(true,"Supabase 연결 설정됨");
+  else setApiState(false,"config.js 설정 필요");
+})();
+</script>
+
+
+<script>
+(function(){
+  const cfg = window.HAWAII_CONFIG || {};
+  const callWorker = async(payload)=>{
+    const url=String(cfg.supabaseFunctionUrl||"").trim();
+    if(!url) throw new Error("config.js에 Supabase Edge Function 주소를 입력하세요.");
+    const r=await fetch(url,{
+      method:"POST",
+      headers:{"Content-Type":"application/json",...(cfg.supabaseAnonKey?{"apikey":cfg.supabaseAnonKey,"Authorization":"Bearer "+cfg.supabaseAnonKey}:{})},
+      body:JSON.stringify(payload)
+    });
+    let data={}; try{data=await r.json()}catch(e){}
+    if(!r.ok) throw new Error(data.error||`AI 서버 오류 (${r.status})`);
+    return data;
+  };
+
+  document.querySelectorAll(".ai-preset").forEach(btn=>btn.addEventListener("click",()=>{
+    const el=document.getElementById("aiTravelInput");
+    el.value=btn.dataset.text||"";
+    el.focus();
+  }));
+
+  let lastAiEnglish="";
+  document.getElementById("askTravelAiBtn")?.addEventListener("click",async()=>{
+    const input=document.getElementById("aiTravelInput");
+    const wrap=document.getElementById("aiTravelResultWrap");
+    const summary=document.getElementById("aiTravelSummary");
+    const english=document.getElementById("aiTravelEnglish");
+    const actions=document.getElementById("aiTravelActions");
+    const text=input.value.trim();
+    if(!text){alert("상황을 입력해 주세요.");return;}
+    wrap.classList.remove("hidden");
+    summary.textContent="AI가 상황을 정리하는 중…"; english.textContent=""; actions.innerHTML="";
+    try{
+      const data=await callWorker({mode:"assistant",text});
+      summary.textContent=data.summary||"";
+      lastAiEnglish=data.english||"";
+      english.textContent=lastAiEnglish;
+      const arr=Array.isArray(data.actions)?data.actions:[];
+      actions.innerHTML=arr.map(x=>`<div class="suggestion-item">• ${String(x)}</div>`).join("");
+    }catch(e){ summary.textContent="오류: "+e.message; }
+  });
+
+  document.getElementById("speakAiEnglishBtn")?.addEventListener("click",()=>{
+    if(lastAiEnglish && typeof speak==="function") speak(lastAiEnglish,"en-US");
+  });
+  document.getElementById("copyAiEnglishBtn")?.addEventListener("click",async()=>{
+    if(!lastAiEnglish)return;
+    await navigator.clipboard.writeText(lastAiEnglish);
+    alert("영어 문장을 복사했습니다.");
+  });
+
+  let imageData="";
+  const fileInput=document.getElementById("visionImageInput");
+  fileInput?.addEventListener("change",()=>{
+    const file=fileInput.files?.[0]; if(!file)return;
+    if(file.size>6*1024*1024){alert("사진은 6MB 이하로 선택해 주세요.");fileInput.value="";return;}
+    const reader=new FileReader();
+    reader.onload=()=>{imageData=String(reader.result||"");const p=document.getElementById("visionPreview");p.src=imageData;p.classList.remove("hidden");};
+    reader.readAsDataURL(file);
+  });
+  document.getElementById("analyzeImageBtn")?.addEventListener("click",async()=>{
+    if(!imageData){alert("먼저 사진을 선택하세요.");return;}
+    const wrap=document.getElementById("visionResultWrap");
+    const out=document.getElementById("visionResult");
+    wrap.classList.remove("hidden"); out.textContent="사진을 분석하는 중…";
+    try{
+      const data=await callWorker({mode:"vision",image:imageData});
+      out.textContent=data.result||"분석 결과가 없습니다.";
+    }catch(e){out.textContent="오류: "+e.message;}
+  });
+})();
+</script>
+
+
+<script>
+/* v17.1 정확한 한국/하와이 시각 및 일정 카운트다운 */
+(function(){
+  const HAWAII_TZ = "Pacific/Honolulu";
+  const KOREA_TZ = "Asia/Seoul";
+
+  function formatClock(date, timeZone){
+    return new Intl.DateTimeFormat("ko-KR",{
+      timeZone,hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false
+    }).format(date);
+  }
+  function formatDate(date, timeZone){
+    return new Intl.DateTimeFormat("ko-KR",{
+      timeZone,year:"numeric",month:"2-digit",day:"2-digit",weekday:"short"
+    }).format(date);
+  }
+  function updateDualClocks(){
+    const now = new Date();
+    const hClock=document.getElementById("hawaiiClock");
+    const hDate=document.getElementById("hawaiiDate");
+    const kClock=document.getElementById("koreaClock");
+    const kDate=document.getElementById("koreaDate");
+    if(hClock) hClock.textContent=formatClock(now,HAWAII_TZ);
+    if(hDate) hDate.textContent="하와이 현지 날짜 "+formatDate(now,HAWAII_TZ);
+    if(kClock) kClock.textContent=formatClock(now,KOREA_TZ);
+    if(kDate) kDate.textContent="한국 현재 날짜 "+formatDate(now,KOREA_TZ);
+  }
+
+  // 하와이 일정은 하와이 현지 날짜/시간으로 계산합니다.
+  // timezone offset: Hawaii Standard Time is UTC-10 year-round.
+  function hawaiiDateTime(year,month,day,hour=0,minute=0){
+    return new Date(Date.UTC(year,month-1,day,hour+10,minute,0));
+  }
+
+  const tripEvents = [
+    {date:[2026,9,4,18,0], end:[2026,9,4,20,30], title:"인천공항 제2터미널 도착", basis:"한국 출발 일정"},
+    {date:[2026,9,5,21,0], title:"KE053 출발", basis:"한국 출발 일정"},
+    {date:[2026,9,5,10,30], title:"호놀룰루 도착 및 렌터카 수령", basis:"하와이 현지 일정"},
+    {date:[2026,9,6,9,0], title:"와이키키 일정", basis:"하와이 현지 일정"},
+    {date:[2026,9,7,8,0], title:"오아후 동부 일정", basis:"하와이 현지 일정"},
+    {date:[2026,9,8,9,0], title:"노스쇼어 일정", basis:"하와이 현지 일정"},
+    {date:[2026,9,9,10,0], title:"자유 일정", basis:"하와이 현지 일정"},
+    {date:[2026,9,10,8,30], title:"투어 일정", basis:"하와이 현지 일정"},
+    {date:[2026,9,11,9,0], title:"마지막 일정", basis:"하와이 현지 일정"},
+    {date:[2026,9,12,0,0], title:"귀국 일정", basis:"하와이 현지 일정"}
+  ].map(e=>({...e, start:hawaiiDateTime(...e.date)}));
+
+  function formatRemaining(ms){
+    if(ms<=0) return "곧 시작";
+    const totalMinutes=Math.floor(ms/60000);
+    const days=Math.floor(totalMinutes/1440);
+    const hours=Math.floor((totalMinutes%1440)/60);
+    const minutes=totalMinutes%60;
+    if(days>0) return `${days}일 ${hours}시간 ${minutes}분 남음`;
+    if(hours>0) return `${hours}시간 ${minutes}분 남음`;
+    return `${minutes}분 남음`;
+  }
+
+  function formatEventDate(event){
+    return new Intl.DateTimeFormat("ko-KR",{
+      timeZone:HAWAII_TZ,year:"numeric",month:"2-digit",day:"2-digit",
+      weekday:"short",hour:"2-digit",minute:"2-digit",hour12:false
+    }).format(event.start)+" (하와이 기준)";
+  }
+
+  function updateCountdown(){
+    const now=new Date();
+    const next=tripEvents.find(e=>e.start>now);
+    const remainEl=document.querySelector("#remainingTime, [data-role='remaining-time'], .remaining-time");
+    const titleEl=document.querySelector("#nextScheduleTitle, #nextEventTitle, [data-role='next-title']");
+    const timeEl=document.querySelector("#nextScheduleTime, #nextEventTime, [data-role='next-time']");
+    const absEl=document.getElementById("nextEventDateTime");
+
+    if(!next){
+      if(remainEl) remainEl.textContent="전체 일정 완료";
+      if(titleEl) titleEl.textContent="오늘 일정이 모두 끝났습니다.";
+      if(timeEl) timeEl.textContent="";
+      if(absEl) absEl.textContent="";
+      return;
+    }
+
+    const diff=next.start-now;
+    const minutes=Math.floor(diff/60000);
+
+    if(remainEl){
+      remainEl.textContent=formatRemaining(diff);
+      remainEl.classList.remove("countdown-urgent","countdown-soon","countdown-normal");
+      remainEl.classList.add(minutes<=5?"countdown-urgent":minutes<=30?"countdown-soon":"countdown-normal");
+    }
+    if(titleEl) titleEl.textContent=next.title;
+    if(timeEl){
+      timeEl.textContent=new Intl.DateTimeFormat("ko-KR",{
+        timeZone:HAWAII_TZ,hour:"2-digit",minute:"2-digit",hour12:false
+      }).format(next.start);
+    }
+    if(absEl) absEl.textContent=formatEventDate(next);
+  }
+
+  updateDualClocks();
+  updateCountdown();
+  setInterval(updateDualClocks,1000);
+  setInterval(updateCountdown,30000);
+})();
+</script>
+
+
+
+
+
+<script>
+(function(){
+  function stampCountdownUpdate(){
+    const el=document.getElementById('countdownUpdatedAt');
+    if(!el)return;
+    el.textContent='마지막 갱신: '+new Intl.DateTimeFormat('ko-KR',{
+      hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false
+    }).format(new Date());
+  }
+  window.refreshTravelCountdown=function(){
+    const btn=document.getElementById('refreshCountdownBtn');
+    if(btn){btn.classList.add('refreshing');btn.textContent='↻ 갱신 중';}
+    try{
+      if(typeof updateHomeDashboard==='function') updateHomeDashboard();
+      stampCountdownUpdate();
+    }finally{
+      setTimeout(()=>{if(btn){btn.classList.remove('refreshing');btn.textContent='↻ 새로고침';}},350);
+    }
+  };
+  document.getElementById('refreshCountdownBtn')?.addEventListener('click',window.refreshTravelCountdown);
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')window.refreshTravelCountdown();});
+  window.addEventListener('focus',window.refreshTravelCountdown);
+  window.addEventListener('pageshow',window.refreshTravelCountdown);
+  setInterval(window.refreshTravelCountdown,30000);
+  window.refreshTravelCountdown();
+})();
+</script>
+
+
+<script>
+(function(){
+  const ROOT_KEY="travelmate_v17";
+  const LEGACY_KEY="travelmate_v16";
+  const defaultTrip={id:"trip-hawaii-2026",name:"2026 하와이 여행",city:"Honolulu",country:"United States",timezone:"Pacific/Honolulu",currency:"USD",start:"2026-09-04",end:"2026-09-12",color:"#0a8791"};
+
+  const esc=v=>String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+  const uid=()=>`trip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,7)}`;
+
+  function loadTrips(){
+    try{const v=JSON.parse(localStorage.getItem(ROOT_KEY+"_trips")||"[]");if(Array.isArray(v)&&v.length)return v}catch{}
+    let first={...defaultTrip};
+    try{first={...first,...JSON.parse(localStorage.getItem(LEGACY_KEY+"_settings")||"{}"),id:defaultTrip.id}}catch{}
+    localStorage.setItem(ROOT_KEY+"_trips",JSON.stringify([first]));
+    localStorage.setItem(ROOT_KEY+"_active",first.id);
+    return [first];
+  }
+  const saveTrips=v=>localStorage.setItem(ROOT_KEY+"_trips",JSON.stringify(v));
+  function activeId(){
+    const trips=loadTrips(),saved=localStorage.getItem(ROOT_KEY+"_active");
+    return trips.some(t=>t.id===saved)?saved:trips[0].id;
+  }
+  function setActive(id){
+    localStorage.setItem(ROOT_KEY+"_active",id);
+    refreshAll();
+    if(typeof updateHomeDashboard==="function")updateHomeDashboard();
+    if(typeof refreshTravelCountdown==="function")refreshTravelCountdown();
+  }
+  window.getTripSettings=function(){
+    const trips=loadTrips();
+    return trips.find(t=>t.id===activeId())||trips[0]||defaultTrip;
+  };
+  const tripKey=(suffix,id=activeId())=>`${ROOT_KEY}_${id}_${suffix}`;
+  const range=t=>!t.start&&!t.end?"날짜 미정":(!t.end||t.start===t.end?t.start:`${t.start} ~ ${t.end}`);
+
+  function renderSwitcher(){
+    const trips=loadTrips(),active=activeId(),el=document.getElementById("quickTripSwitcher");
+    if(!el)return;
+    el.innerHTML=trips.map(t=>`<option value="${t.id}" ${t.id===active?"selected":""}>${esc(t.name)}</option>`).join("");
+  }
+  function renderTrips(){
+    const trips=loadTrips(),active=activeId(),list=document.getElementById("tripList"),summary=document.getElementById("activeTripSummary");
+    const current=trips.find(t=>t.id===active)||trips[0];
+    if(summary&&current)summary.innerHTML=`<b>현재 여행: ${esc(current.name)}</b><div class="muted">${esc(current.city)} · ${esc(current.country)} · ${esc(current.timezone)} · ${esc(current.currency)}</div><div style="margin-top:4px">${esc(range(current))}</div>`;
+    if(!list)return;
+    list.innerHTML=trips.map(t=>`<article class="trip-card ${t.id===active?"active":""}" style="--trip-color:${esc(t.color||"#0a8791")}">${t.id===active?'<span class="trip-status-pill">현재 여행</span>':""}<h3>${esc(t.name)}</h3><div class="trip-card-meta">${esc(t.city)} · ${esc(t.country)} · ${esc(t.currency)}</div><div class="trip-card-dates">${esc(range(t))}</div><div class="trip-card-actions">${t.id!==active?`<button class="primary" data-action="switch" data-id="${t.id}">이 여행 사용</button>`:""}<button class="secondary" data-action="edit" data-id="${t.id}">수정</button><button class="secondary" data-action="duplicate" data-id="${t.id}">복제</button>${trips.length>1?`<button class="secondary danger" data-action="delete" data-id="${t.id}">삭제</button>`:""}</div></article>`).join("");
+    list.querySelectorAll("[data-action]").forEach(b=>b.onclick=()=>{
+      const id=b.dataset.id,a=b.dataset.action;
+      if(a==="switch")setActive(id);
+      if(a==="edit")openEditor(id);
+      if(a==="duplicate")duplicateTrip(id);
+      if(a==="delete")deleteTrip(id);
+    });
+  }
+  function banner(){
+    const s=getTripSettings();
+    if(document.getElementById("currentTripLabel"))document.getElementById("currentTripLabel").textContent=s.name;
+    if(document.getElementById("currentTripMeta"))document.getElementById("currentTripMeta").textContent=[s.city,s.country,s.currency].filter(Boolean).join(" · ");
+  }
+  function loadSettings(){
+    const s=getTripSettings();
+    const map={tripName:s.name,tripCity:s.city,tripCountry:s.country,tripTimezone:s.timezone,tripCurrency:s.currency,tripStart:s.start,tripEnd:s.end};
+    Object.entries(map).forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v||""});
+  }
+  function loadFields(){document.querySelectorAll("[data-travel-store]").forEach(e=>e.value=localStorage.getItem(tripKey(e.dataset.travelStore))||"")}
+  function saveFields(){document.querySelectorAll("[data-travel-store]").forEach(e=>localStorage.setItem(tripKey(e.dataset.travelStore),e.value));alert("현재 여행에 저장했습니다.")}
+  const getExpenses=()=>{try{return JSON.parse(localStorage.getItem(tripKey("expenses"))||"[]")}catch{return[]}};
+  const setExpenses=v=>localStorage.setItem(tripKey("expenses"),JSON.stringify(v));
+  function renderExpenses(){
+    const list=getExpenses(),box=document.getElementById("expenseList"),sum=document.getElementById("expenseSummary");if(!box||!sum)return;
+    const total=list.reduce((a,x)=>a+(Number(x.krw)||0),0);sum.textContent=`현재 여행 지출 ${list.length}건 · 약 ${Math.round(total).toLocaleString()}원`;
+    box.innerHTML=list.map((x,i)=>`<div class="expense-row"><div><b>${esc(x.title)}</b><div class="muted">${x.amount} ${x.currency}</div></div><div><b>${Math.round(x.krw).toLocaleString()}원</b> <button class="secondary" data-expense-delete="${i}">삭제</button></div></div>`).join("");
+    box.querySelectorAll("[data-expense-delete]").forEach(b=>b.onclick=()=>{const v=getExpenses();v.splice(Number(b.dataset.expenseDelete),1);setExpenses(v);renderExpenses()});
+  }
+  function refreshAll(){renderSwitcher();renderTrips();banner();loadSettings();loadFields();renderExpenses()}
+
+  function openEditor(id=""){
+    const t=id?loadTrips().find(x=>x.id===id):{id:"",name:"",city:"",country:"",timezone:"",currency:"",start:"",end:"",color:"#0a8791"};
+    editTripId.value=t?.id||"";editTripName.value=t?.name||"";editTripCity.value=t?.city||"";editTripCountry.value=t?.country||"";editTripTimezone.value=t?.timezone||"";editTripCurrency.value=t?.currency||"";editTripStart.value=t?.start||"";editTripEnd.value=t?.end||"";editTripColor.value=t?.color||"#0a8791";
+    tripEditorTitle.textContent=id?"여행 수정":"새 여행 만들기";tripEditorCard.classList.remove("hidden");tripEditorCard.scrollIntoView({behavior:"smooth"});
+  }
+  const closeEditor=()=>tripEditorCard.classList.add("hidden");
+  function saveEditor(){
+    const id=editTripId.value||uid();
+    const trip={id,name:editTripName.value.trim(),city:editTripCity.value.trim(),country:editTripCountry.value.trim(),timezone:editTripTimezone.value.trim(),currency:editTripCurrency.value.trim().toUpperCase(),start:editTripStart.value,end:editTripEnd.value,color:editTripColor.value||"#0a8791"};
+    if(!trip.name)return alert("여행 이름을 입력하세요.");
+    if(!trip.timezone)return alert("시간대를 입력하세요. 예: Asia/Tokyo");
+    const trips=loadTrips(),i=trips.findIndex(t=>t.id===id);if(i>=0)trips[i]={...trips[i],...trip};else trips.unshift(trip);
+    saveTrips(trips);localStorage.setItem(ROOT_KEY+"_active",id);closeEditor();refreshAll();alert("여행을 저장하고 현재 여행으로 설정했습니다.");
+  }
+  function duplicateTrip(id){const trips=loadTrips(),src=trips.find(t=>t.id===id);if(!src)return;trips.unshift({...src,id:uid(),name:src.name+" 복사본"});saveTrips(trips);renderTrips()}
+  function deleteTrip(id){const trips=loadTrips(),t=trips.find(x=>x.id===id);if(!t||!confirm(`"${t.name}" 여행을 삭제할까요?`))return;const next=trips.filter(x=>x.id!==id);saveTrips(next);if(activeId()===id)localStorage.setItem(ROOT_KEY+"_active",next[0].id);refreshAll()}
+
+  quickTripSwitcher?.addEventListener("change",e=>setActive(e.target.value));
+  newTripBtn?.addEventListener("click",()=>openEditor());
+  closeTripEditorBtn?.addEventListener("click",closeEditor);
+  cancelTripBtn?.addEventListener("click",closeEditor);
+  saveTripBtn?.addEventListener("click",saveEditor);
+
+  saveTripSettings?.addEventListener("click",()=>{
+    const trips=loadTrips(),id=activeId(),i=trips.findIndex(t=>t.id===id);if(i<0)return;
+    trips[i]={...trips[i],name:tripName.value.trim(),city:tripCity.value.trim(),country:tripCountry.value.trim(),timezone:tripTimezone.value.trim(),currency:tripCurrency.value.trim().toUpperCase(),start:tripStart.value,end:tripEnd.value};
+    saveTrips(trips);refreshAll();alert("현재 여행 설정을 저장했습니다.");
+  });
+
+  saveWalletBtn?.addEventListener("click",saveFields);
+  saveEmergencyBtn?.addEventListener("click",saveFields);
+  addExpenseBtn?.addEventListener("click",()=>{
+    const title=expenseTitle.value.trim(),amount=Number(expenseAmount.value||0),currency=expenseCurrency.value.trim().toUpperCase(),rate=Number(expenseRate.value||0);
+    if(!title||!amount)return alert("항목과 금액을 입력하세요.");
+    const v=getExpenses();v.unshift({title,amount,currency,krw:amount*rate});setExpenses(v);renderExpenses();
+  });
+
+  const emergencyData={"United States":{police:"911",ambulance:"911"},"Japan":{police:"110",ambulance:"119"},"France":{police:"17",ambulance:"15 또는 112"},"United Kingdom":{police:"999 또는 112",ambulance:"999 또는 112"}};
+  document.querySelectorAll("[data-emergency]").forEach(b=>b.onclick=()=>{const s=getTripSettings(),d=emergencyData[s.country]||{};emergencyResult.textContent=d[b.dataset.emergency]||`${s.country}의 긴급 정보는 확인이 필요합니다.`});
+
+  refreshAll();
+})();
+</script>
+
+
+<script>
+(function(){
+  const fixedTrip = {
+    id:"trip-hawaii-2026",
+    name:"2026 하와이 여행",
+    city:"Honolulu",
+    country:"United States",
+    timezone:"Pacific/Honolulu",
+    currency:"USD",
+    start:"2026-09-04",
+    end:"2026-09-12",
+    color:"#0a8791"
+  };
+  window.getTripSettings = function(){ return {...fixedTrip}; };
+  const label=document.getElementById("currentTripLabel");
+  const meta=document.getElementById("currentTripMeta");
+  if(label) label.textContent=fixedTrip.name;
+  if(meta) meta.textContent="Honolulu · United States · USD";
+})();
+</script>
+
+</body>
+</html>
