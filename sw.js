@@ -1,12 +1,5 @@
-const CACHE_NAME="travelmate-ai-v17-1-stable-slim";
-const ASSETS=["./","./index.html","./config.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./favicon.ico"];
-self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(ASSETS)))});
-self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
-self.addEventListener("fetch",e=>{
-  if(e.request.method!=="GET") return;
-  if(e.request.mode==="navigate"){
-    e.respondWith(fetch(e.request).then(r=>{const x=r.clone();caches.open(CACHE_NAME).then(c=>c.put("./index.html",x));return r}).catch(()=>caches.match("./index.html")));
-    return;
-  }
-  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
-});
+const CACHE="travelmate-ai-v1-2-travel-assistant";
+const ASSETS=["./","./index.html","./styles.css","./app.js","./config.js","./country-data.js","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./favicon.png"];
+self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)))});
+self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==CACHE).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));
+self.addEventListener("fetch",e=>{if(e.request.method!=="GET")return;e.respondWith(fetch(e.request).then(r=>{const c=r.clone();caches.open(CACHE).then(x=>x.put(e.request,c));return r}).catch(()=>caches.match(e.request).then(r=>r||caches.match("./index.html"))))});

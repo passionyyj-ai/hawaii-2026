@@ -1,13 +1,12 @@
 {
-  "name": "TravelMate AI v17.1 Stable Slim",
-  "short_name": "TravelMate AI",
-  "description": "여러 여행을 저장·전환하고 일정, 통역, AI 비서, 지갑, 비용을 관리하는 해외여행 에이전트",
-  "start_url": "./index.html?v=17.1",
+  "name": "TravelMate AI v1.2",
+  "short_name": "TravelMate",
+  "description": "여러 해외여행을 쉽고 크게 관리하는 여행 도우미",
+  "start_url": "./index.html?v=1.2",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f4f7f8",
-  "theme_color": "#087f8c",
-  "orientation": "portrait-primary",
+  "background_color": "#F2F7F7",
+  "theme_color": "#0B6E75",
   "lang": "ko-KR",
   "icons": [
     {
