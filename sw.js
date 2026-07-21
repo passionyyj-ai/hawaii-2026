@@ -1,4 +1,4 @@
-const CACHE_NAME='travelmate-v21-1';
+const CACHE_NAME='travelmate-v21-2';
 const CORE=['./','./index.html','./config.js','./v21.js','./manifest.webmanifest','./version.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./favicon.ico'];
 self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE)))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('travelmate-')&&k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

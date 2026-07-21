@@ -353,7 +353,7 @@ textarea{width:100%;box-sizing:border-box;border:1px solid #d8e3e5;border-radius
 </style></head>
 <body>
 <input class="day-radio" type="radio" name="day" id="day0" checked><input class="day-radio" type="radio" name="day" id="day1"><input class="day-radio" type="radio" name="day" id="day2"><input class="day-radio" type="radio" name="day" id="day3"><input class="day-radio" type="radio" name="day" id="day4"><input class="day-radio" type="radio" name="day" id="day5"><input class="day-radio" type="radio" name="day" id="day6"><input class="day-radio" type="radio" name="day" id="day7"><input class="day-radio" type="radio" name="day" id="day8">
-<div class="app"><div class="version-banner">✅ TravelMate AI v21.1 · 안정화 · 음성 인식 · 여행 공유</div><div style="display:flex;justify-content:flex-end;margin:8px 0 2px"><button id="v20TripButton" class="btn primary" type="button">☁️ 여행 공유</button></div>
+<div class="app"><div class="version-banner">✅ TravelMate AI v21.2 · iPhone 음성 인식 개선 · 여행 공유</div><div style="display:flex;justify-content:flex-end;margin:8px 0 2px"><button id="v20TripButton" class="btn primary" type="button">☁️ 여행 공유</button></div>
 <header class="hero">
   <div class="eyebrow">MY TRIP AGENT</div>
   <h1>🌺 TravelMate AI</h1>
@@ -2235,7 +2235,7 @@ renderCategories();renderPhrases();
 
 
 <script>
-/* TravelMate AI v21.1 — 단일 세션 음성 인식 안정화 */
+/* TravelMate AI v21.2 — iPhone Safari 직접 시작형 음성 인식 */
 (function(){
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const support = document.getElementById("interpreterSupport");
@@ -2243,64 +2243,255 @@ renderCategories();renderPhrases();
   const koBox = document.getElementById("spokenKorean");
   const enBtn = document.getElementById("listenEnglishBtn");
   const koBtn = document.getElementById("listenKoreanBtn");
+
   let active = null;
   let sessionId = 0;
-  let startWatchdog = null;
+  let watchdog = 0;
 
-  [enBox,koBox].forEach(box=>{
-    if(!box) return;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  [enBox, koBox].forEach(box => {
+    if (!box) return;
     box.contentEditable = "true";
-    box.setAttribute("role","textbox");
-    box.setAttribute("aria-label","음성 인식 결과를 직접 수정할 수 있습니다");
+    box.setAttribute("role", "textbox");
+    box.setAttribute("aria-label", "음성 인식 결과를 직접 수정할 수 있습니다");
+    box.setAttribute("inputmode", "text");
   });
 
-  function getLog(){try{return JSON.parse(localStorage.getItem(STORE_PREFIX+"interpreter_log")||"[]")}catch{return []}}
-  function saveLog(items){localStorage.setItem(STORE_PREFIX+"interpreter_log",JSON.stringify(items.slice(0,30)))}
-  function addLog(who,text){if(!text?.trim())return;const items=getLog();items.unshift({who,text:text.trim(),time:new Date().toISOString()});saveLog(items);renderLog()}
-  function renderLog(){const root=document.getElementById("conversationLog");if(!root)return;const items=getLog();root.innerHTML=items.length?items.map(x=>{const d=new Date(x.time);return `<div class="log-item"><div class="who">${x.who} · ${d.toLocaleTimeString("ko-KR",{hour:"2-digit",minute:"2-digit"})}</div><div>${String(x.text).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}</div></div>`}).join(""):"기록이 없습니다."}
-  function label(btn){return btn===enBtn?"🎤 영어 듣기":"🎤 한국어 말하기"}
-  function resetButton(btn){if(!btn)return;btn.classList.remove("listening");btn.disabled=false;btn.textContent=label(btn)}
-  function finish(id){if(active?.id!==id)return;clearTimeout(startWatchdog);resetButton(active.button);active=null}
-  function stop(){if(!active)return;const a=active;active=null;clearTimeout(startWatchdog);resetButton(a.button);try{a.rec.abort()}catch{}}
-
-  async function microphonePreflight(){
-    if(!navigator.mediaDevices?.getUserMedia) return;
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    stream.getTracks().forEach(t=>t.stop());
-    await new Promise(r=>setTimeout(r,180));
+  function getLog(){
+    try { return JSON.parse(localStorage.getItem(STORE_PREFIX + "interpreter_log") || "[]"); }
+    catch { return []; }
+  }
+  function saveLog(items){
+    localStorage.setItem(STORE_PREFIX + "interpreter_log", JSON.stringify(items.slice(0, 30)));
+  }
+  function addLog(who, text){
+    if (!text?.trim()) return;
+    const items = getLog();
+    items.unshift({ who, text: text.trim(), time: new Date().toISOString() });
+    saveLog(items);
+    renderLog();
+  }
+  function renderLog(){
+    const root = document.getElementById("conversationLog");
+    if (!root) return;
+    const items = getLog();
+    root.innerHTML = items.length ? items.map(x => {
+      const d = new Date(x.time);
+      const safe = String(x.text).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+      return `<div class="log-item"><div class="who">${x.who} · ${d.toLocaleTimeString("ko-KR", {hour:"2-digit", minute:"2-digit"})}</div><div>${safe}</div></div>`;
+    }).join("") : "기록이 없습니다.";
   }
 
-  async function listen(lang,target,button,who){
-    if(active){ if(active.button===button){stop();return;} stop(); await new Promise(r=>setTimeout(r,250)); }
-    if(!Recognition){alert("이 브라우저에서는 음성 인식을 지원하지 않습니다. 아래 입력 영역을 눌러 직접 입력하거나 Google 번역을 이용해 주세요.");return;}
-    try{window.speechSynthesis?.cancel()}catch{}
-    button.disabled=true;button.textContent="마이크 준비 중…";target.textContent="마이크 권한을 확인하고 있습니다…";
-    try{await microphonePreflight()}catch(e){resetButton(button);target.textContent=e?.name==="NotAllowedError"?"마이크 권한이 꺼져 있습니다. iPhone 설정 → Safari(또는 앱) → 마이크에서 허용해 주세요.":"마이크를 열 수 없습니다. 다른 앱의 통화·녹음을 종료한 뒤 다시 시도해 주세요.";return;}
-
-    const id=++sessionId, rec=new Recognition();
-    rec.lang=lang;rec.interimResults=true;rec.continuous=false;rec.maxAlternatives=1;
-    active={id,rec,button,target,who,started:false,finalText:"",hadResult:false};
-    button.disabled=false;button.classList.add("listening");button.textContent="⏹ 듣는 중 · 누르면 중지";target.textContent="말씀해 주세요…";
-
-    rec.onstart=()=>{if(active?.id===id){active.started=true;support.textContent="🟢 마이크가 켜졌습니다. 말씀해 주세요."}};
-    rec.onaudiostart=()=>{if(active?.id===id)target.textContent="듣고 있습니다…"};
-    rec.onresult=e=>{if(active?.id!==id)return;let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal){active.finalText+=(active.finalText?" ":"")+t.trim();active.hadResult=true}else interim+=t}target.textContent=(active.finalText||interim||"듣고 있습니다…").trim()};
-    rec.onerror=e=>{if(active?.id!==id)return;if(e.error==="aborted")return;const messages={"not-allowed":"마이크 권한이 거부되었습니다. iPhone 설정에서 마이크를 허용해 주세요.","service-not-allowed":"브라우저의 음성 인식 서비스가 차단되었습니다. Safari에서 직접 열어 다시 시도해 주세요.","no-speech":"음성이 감지되지 않았습니다. 버튼을 다시 누른 뒤 가까이에서 말해 주세요.","network":"Apple/Google 음성 인식 서버 연결에 실패했습니다. 인터넷 연결을 확인해 주세요.","audio-capture":"마이크를 사용할 수 없습니다. 통화나 다른 녹음 앱을 종료해 주세요."};target.textContent=messages[e.error]||("음성 인식 오류: "+e.error);support.textContent="⚠️ "+target.textContent};
-    rec.onend=()=>{if(active?.id!==id)return;const text=target.textContent.trim();if(active.hadResult&&active.finalText.trim()){target.textContent=active.finalText.trim();addLog(who,active.finalText);support.textContent="✅ 음성 인식이 완료되었습니다."}else if(text==="말씀해 주세요…"||text==="듣고 있습니다…"){target.textContent="음성이 입력되지 않았습니다. 다시 누르거나 이 영역을 눌러 직접 입력하세요."}finish(id)};
-
-    startWatchdog=setTimeout(()=>{if(active?.id===id&&!active.started){target.textContent="마이크가 시작되지 않았습니다. Safari에서 페이지를 직접 열고 마이크 권한을 확인해 주세요.";support.textContent="⚠️ 음성 인식 시작 실패";stop()}},5000);
-    try{rec.start()}catch(e){target.textContent="음성 인식을 시작하지 못했습니다. 잠시 후 다시 눌러 주세요.";support.textContent="⚠️ "+(e?.message||"시작 실패");finish(id)}
+  function defaultLabel(btn){
+    return btn === enBtn ? "🎤 영어 듣기" : "🎤 한국어 말하기";
+  }
+  function resetButton(btn){
+    if (!btn) return;
+    btn.classList.remove("listening");
+    btn.disabled = false;
+    btn.textContent = defaultLabel(btn);
+  }
+  function clearWatchdog(){
+    if (watchdog) window.clearTimeout(watchdog);
+    watchdog = 0;
+  }
+  function release(id){
+    if (!active || active.id !== id) return;
+    clearWatchdog();
+    resetButton(active.button);
+    active = null;
+  }
+  function stopActive(showMessage){
+    if (!active) return;
+    const a = active;
+    active = null;
+    clearWatchdog();
+    resetButton(a.button);
+    try { a.rec.abort(); } catch {}
+    if (showMessage) {
+      a.target.textContent = "음성 인식을 중지했습니다. 다시 누르면 새로 시작합니다.";
+      if (support) support.textContent = "⏹ 음성 인식이 중지되었습니다.";
+    }
   }
 
-  support.textContent=Recognition?"✅ 음성 인식 준비됨 · 결과 영역을 눌러 직접 수정할 수도 있습니다.":"⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다. 결과 영역을 눌러 직접 입력하세요.";
-  enBtn?.addEventListener("click",()=>listen("en-US",enBox,enBtn,"상대방 영어"));
-  koBtn?.addEventListener("click",()=>listen("ko-KR",koBox,koBtn,"내 한국어"));
-  document.addEventListener("visibilitychange",()=>{if(document.hidden)stop()});
-  window.addEventListener("pagehide",stop);
-  document.getElementById("copyEnglishBtn")?.addEventListener("click",()=>{const t=enBox.textContent.trim();navigator.clipboard?.writeText(t).then(()=>alert("복사했습니다.")).catch(()=>prompt("복사하세요.",t))});
-  document.getElementById("clearEnglishBtn")?.addEventListener("click",()=>{enBox.textContent="영어 듣기 버튼을 누른 뒤 상대방에게 말해 달라고 하세요."});
-  document.getElementById("clearKoreanBtn")?.addEventListener("click",()=>{koBox.textContent="한국어 말하기 버튼을 누르고 하고 싶은 말을 말하세요."});
-  document.getElementById("clearConversationLog")?.addEventListener("click",()=>{if(confirm("대화 기록을 모두 삭제할까요?")){saveLog([]);renderLog()}});
+  function errorMessage(code){
+    const messages = {
+      "not-allowed": "마이크 또는 음성 인식 권한이 거부되었습니다. Safari의 웹사이트 설정에서 마이크를 허용해 주세요.",
+      "service-not-allowed": "Safari 음성 인식 서비스가 차단되었습니다. 일반 Safari 탭에서 사이트를 직접 열어 주세요.",
+      "audio-capture": "마이크를 사용할 수 없습니다. 통화·녹음 앱을 종료한 뒤 다시 시도해 주세요.",
+      "no-speech": "음성이 감지되지 않았습니다. 버튼을 누른 직후 가까이에서 말씀해 주세요.",
+      "network": "음성 인식 서버 연결에 실패했습니다. Wi-Fi와 모바일 데이터를 바꿔 다시 시도해 주세요.",
+      "language-not-supported": "선택한 언어의 음성 인식을 지원하지 않습니다.",
+      "aborted": "음성 인식이 중지되었습니다."
+    };
+    return messages[code] || `음성 인식 오류가 발생했습니다. (${code || "unknown"})`;
+  }
+
+  /*
+   * iPhone Safari 핵심 처리:
+   * 클릭 이벤트와 recognition.start() 사이에 await, Promise, setTimeout,
+   * getUserMedia 사전 호출을 두지 않는다.
+   */
+  function listen(lang, target, button, who){
+    if (!Recognition) {
+      target.textContent = "이 브라우저는 웹 음성 인식을 지원하지 않습니다. 이 영역을 누른 뒤 아이폰 키보드의 받아쓰기 버튼을 이용해 주세요.";
+      if (support) support.textContent = "⚠️ 웹 음성 인식 미지원 · 키보드 받아쓰기를 이용하세요.";
+      target.focus();
+      return;
+    }
+
+    if (active) {
+      if (active.button === button) {
+        stopActive(true);
+        return;
+      }
+      stopActive(false);
+    }
+
+    const id = ++sessionId;
+    const rec = new Recognition();
+    const state = {
+      id, rec, button, target, who,
+      started: false,
+      audioStarted: false,
+      hadResult: false,
+      finalText: "",
+      interimText: "",
+      errorCode: "",
+      userStopped: false
+    };
+
+    rec.lang = lang;
+    rec.interimResults = false; // iOS Safari 안정성 우선
+    rec.continuous = false;
+    rec.maxAlternatives = 1;
+
+    rec.onstart = function(){
+      if (!active || active.id !== id) return;
+      state.started = true;
+      if (support) support.textContent = "🟢 마이크가 켜졌습니다. 지금 말씀해 주세요.";
+      target.textContent = "듣고 있습니다…";
+    };
+
+    rec.onaudiostart = function(){
+      if (!active || active.id !== id) return;
+      state.audioStarted = true;
+      target.textContent = "음성을 듣고 있습니다…";
+    };
+
+    rec.onspeechstart = function(){
+      if (!active || active.id !== id) return;
+      target.textContent = "말씀을 인식하고 있습니다…";
+    };
+
+    rec.onresult = function(event){
+      if (!active || active.id !== id) return;
+      let collected = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i]?.[0]?.transcript?.trim() || "";
+        if (!transcript) continue;
+        collected += (collected ? " " : "") + transcript;
+        if (event.results[i].isFinal) {
+          state.finalText += (state.finalText ? " " : "") + transcript;
+        } else {
+          state.interimText = transcript;
+        }
+      }
+      if (collected) {
+        state.hadResult = true;
+        target.textContent = (state.finalText || state.interimText || collected).trim();
+      }
+    };
+
+    rec.onerror = function(event){
+      if (!active || active.id !== id) return;
+      state.errorCode = event.error || "unknown";
+      if (state.errorCode === "aborted" && state.userStopped) return;
+      const message = errorMessage(state.errorCode);
+      target.textContent = message;
+      if (support) support.textContent = `⚠️ ${message}`;
+    };
+
+    rec.onend = function(){
+      if (!active || active.id !== id) return;
+      const recognized = (state.finalText || state.interimText || "").trim();
+
+      if (recognized) {
+        target.textContent = recognized;
+        addLog(who, recognized);
+        if (support) support.textContent = "✅ 음성 인식이 완료되었습니다.";
+        target.dispatchEvent(new Event("input", { bubbles: true }));
+      } else if (!state.errorCode) {
+        if (!state.started) {
+          target.textContent = "아이폰에서 음성 인식이 시작되지 않았습니다. 버튼을 한 번 더 누른 뒤 바로 말씀해 주세요.";
+          if (support) support.textContent = "⚠️ Safari가 음성 인식을 시작하지 못했습니다.";
+        } else if (!state.audioStarted) {
+          target.textContent = "마이크 오디오가 시작되지 않았습니다. 다른 앱의 통화·녹음을 종료한 뒤 다시 시도해 주세요.";
+          if (support) support.textContent = "⚠️ 마이크 오디오 시작 실패";
+        } else {
+          target.textContent = "음성이 감지되지 않았습니다. 다시 누른 뒤 바로 말씀해 주세요.";
+          if (support) support.textContent = "⚠️ 음성을 감지하지 못했습니다.";
+        }
+      }
+      release(id);
+    };
+
+    active = state;
+
+    /* 사용자 클릭 스택 안에서 가장 먼저 시작한다. */
+    try {
+      rec.start();
+    } catch (error) {
+      active = null;
+      resetButton(button);
+      target.textContent = "음성 인식을 시작하지 못했습니다. 1초 후 버튼을 다시 눌러 주세요.";
+      if (support) support.textContent = `⚠️ 시작 실패: ${error?.name || error?.message || "unknown"}`;
+      return;
+    }
+
+    try { window.speechSynthesis?.cancel(); } catch {}
+    button.disabled = false;
+    button.classList.add("listening");
+    button.textContent = "⏹ 듣는 중 · 누르면 중지";
+    target.textContent = "마이크를 시작하고 있습니다…";
+    if (support) support.textContent = isIOS ? "🟡 iPhone 음성 인식을 시작하고 있습니다…" : "🟡 음성 인식을 시작하고 있습니다…";
+
+    watchdog = window.setTimeout(function(){
+      if (!active || active.id !== id || state.started) return;
+      state.userStopped = true;
+      try { rec.abort(); } catch {}
+      target.textContent = "Safari가 음성 인식을 시작하지 못했습니다. 버튼을 다시 누르거나 입력 영역에서 키보드 받아쓰기를 이용해 주세요.";
+      if (support) support.textContent = "⚠️ 음성 인식 시작 시간 초과";
+      release(id);
+    }, 7000);
+  }
+
+  if (support) {
+    support.textContent = Recognition
+      ? (isIOS ? "✅ iPhone 음성 인식 준비됨 · 버튼을 누른 직후 말씀해 주세요." : "✅ 음성 인식 준비됨 · 결과 영역을 눌러 직접 수정할 수도 있습니다.")
+      : "⚠️ 웹 음성 인식 미지원 · 결과 영역을 누르고 키보드 받아쓰기를 이용하세요.";
+  }
+
+  enBtn?.addEventListener("click", function(){ listen("en-US", enBox, enBtn, "상대방 영어"); });
+  koBtn?.addEventListener("click", function(){ listen("ko-KR", koBox, koBtn, "내 한국어"); });
+  document.addEventListener("visibilitychange", function(){ if (document.hidden) stopActive(false); });
+  window.addEventListener("pagehide", function(){ stopActive(false); });
+
+  document.getElementById("copyEnglishBtn")?.addEventListener("click", function(){
+    const t = enBox.textContent.trim();
+    navigator.clipboard?.writeText(t).then(() => alert("복사했습니다.")).catch(() => prompt("복사하세요.", t));
+  });
+  document.getElementById("clearEnglishBtn")?.addEventListener("click", function(){
+    enBox.textContent = "영어 듣기 버튼을 누른 뒤 상대방에게 말해 달라고 하세요.";
+  });
+  document.getElementById("clearKoreanBtn")?.addEventListener("click", function(){
+    koBox.textContent = "한국어 말하기 버튼을 누르고 하고 싶은 말을 말하세요.";
+  });
+  document.getElementById("clearConversationLog")?.addEventListener("click", function(){
+    if (confirm("대화 기록을 모두 삭제할까요?")) { saveLog([]); renderLog(); }
+  });
   renderLog();
 })();
 </script>
@@ -2832,9 +3023,9 @@ renderCategories();renderPhrases();
 
 
 <script>
-/* TravelMate AI v21.1 — 일정 상세/첨부파일 */
+/* TravelMate AI v21.2 — 일정 상세/첨부파일 */
 (function(){
-  const APP_VERSION='21.1';
+  const APP_VERSION='21.2';
   const DB_NAME='travelmate_v18_data';
   const FILE_STORE='files';
   const DETAIL_STORE='details';
@@ -2988,7 +3179,7 @@ renderCategories();renderPhrases();
 
 
 <script>
-/* TravelMate AI v21.1 — 일정 추가·수정·삭제 */
+/* TravelMate AI v21.2 — 일정 추가·수정·삭제 */
 (function(){
   const STORE='travelmate_v19_schedule_changes';
   let editingCard=null, activePanel=null;
@@ -3045,5 +3236,5 @@ renderCategories();renderPhrases();
  window.addEventListener('load',()=>{pull();setInterval(push,2500);setInterval(pull,30000)});
 })();
 </script>
-<script src="./v21.js?v=21.1"></script></body>
+<script src="./v21.js?v=21.2"></script></body>
 </html>

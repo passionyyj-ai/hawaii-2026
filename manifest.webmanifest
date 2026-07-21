@@ -1,8 +1,8 @@
 {
-  "name": "TravelMate AI v21.1",
+  "name": "TravelMate AI v21.2",
   "short_name": "TravelMate AI",
   "description": "여러 여행을 저장·전환하고 일정, 통역, AI 비서, 지갑, 비용을 관리하는 해외여행 에이전트",
-  "start_url": "./index.html?v=21.1",
+  "start_url": "./index.html?v=21.2",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f4f7f8",
