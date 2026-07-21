@@ -353,7 +353,7 @@ textarea{width:100%;box-sizing:border-box;border:1px solid #d8e3e5;border-radius
 </style></head>
 <body>
 <input class="day-radio" type="radio" name="day" id="day0" checked><input class="day-radio" type="radio" name="day" id="day1"><input class="day-radio" type="radio" name="day" id="day2"><input class="day-radio" type="radio" name="day" id="day3"><input class="day-radio" type="radio" name="day" id="day4"><input class="day-radio" type="radio" name="day" id="day5"><input class="day-radio" type="radio" name="day" id="day6"><input class="day-radio" type="radio" name="day" id="day7"><input class="day-radio" type="radio" name="day" id="day8">
-<div class="app"><div class="version-banner">✅ TravelMate AI v20.0 · 안정 업데이트 · 일정 상세 · 첨부파일</div><div style="display:flex;justify-content:flex-end;margin:8px 0 2px"><button id="v20TripButton" class="btn primary" type="button">☁️ 여행 공유</button></div>
+<div class="app"><div class="version-banner">✅ TravelMate AI v20.1 · 안정 업데이트 · 일정 상세 · 첨부파일</div><div style="display:flex;justify-content:flex-end;margin:8px 0 2px"><button id="v20TripButton" class="btn primary" type="button">☁️ 여행 공유</button></div>
 <header class="hero">
   <div class="eyebrow">MY TRIP AGENT</div>
   <h1>🌺 TravelMate AI</h1>
@@ -2235,7 +2235,7 @@ renderCategories();renderPhrases();
 
 
 <script>
-/* v17.2 모바일 Safari/Chrome 음성 인식 안정화 */
+/* v20.1 iPhone/Android 음성 인식 안정화 */
 (function(){
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const support = document.getElementById("interpreterSupport");
@@ -2244,12 +2244,20 @@ renderCategories();renderPhrases();
   const enBtn = document.getElementById("listenEnglishBtn");
   const koBtn = document.getElementById("listenKoreanBtn");
 
-  let activeRecognition = null;
+  let recognition = null;
   let activeButton = null;
-  let activeSession = 0;
-  let isStarting = false;
-  let expectedAbort = false;
+  let activeTarget = null;
+  let activeLang = "";
+  let activeWho = "";
+  let sessionId = 0;
+  let userListening = false;
+  let starting = false;
   let restartTimer = null;
+  let retryCount = 0;
+  let accumulatedText = "";
+  let lastError = "";
+
+  const MAX_AUTO_RETRIES = 4;
 
   function getLog(){
     try{return JSON.parse(localStorage.getItem(STORE_PREFIX+"interpreter_log")||"[]")}catch(e){return []}
@@ -2276,127 +2284,169 @@ renderCategories();renderPhrases();
   function defaultLabel(button){
     return button===enBtn ? "🎤 영어 듣기" : "🎤 한국어 말하기";
   }
-  function resetButton(button){
+  function setButtonIdle(button){
     if(!button) return;
     button.classList.remove("listening");
     button.disabled=false;
     button.textContent=defaultLabel(button);
   }
-  function clearActive(session){
-    if(session && session!==activeSession) return;
-    resetButton(activeButton);
-    activeRecognition=null;
-    activeButton=null;
-    isStarting=false;
-    expectedAbort=false;
-  }
-  function stopRecognition(silent=true){
-    clearTimeout(restartTimer);
-    restartTimer=null;
-    const rec=activeRecognition;
-    const btn=activeButton;
-    if(!rec){resetButton(btn);return Promise.resolve();}
-    expectedAbort=silent;
-    return new Promise(resolve=>{
-      let done=false;
-      const finish=()=>{if(done)return;done=true;resetButton(btn);resolve();};
-      const timer=setTimeout(finish,450);
-      try{
-        rec.addEventListener("end",()=>{clearTimeout(timer);finish();},{once:true});
-        rec.abort();
-      }catch(e){clearTimeout(timer);finish();}
-    });
-  }
-  async function listen(lang,target,button,who){
-    if(!SpeechRecognition){
-      alert("이 브라우저에서는 음성 인식을 지원하지 않습니다. Google 번역 또는 ChatGPT 음성을 이용해 주세요.");
-      return;
-    }
-    if(isStarting) return;
-    isStarting=true;
-
-    // iPhone에서 TTS 재생 중 STT를 시작하면 aborted가 발생할 수 있어 먼저 완전히 중지합니다.
-    try{window.speechSynthesis?.cancel();}catch(e){}
-    await stopRecognition(true);
-    await new Promise(r=>setTimeout(r,220));
-
-    const session=++activeSession;
-    const rec=new SpeechRecognition();
-    rec.lang=lang;
-    rec.interimResults=true;
-    rec.continuous=false;
-    rec.maxAlternatives=1;
-    activeRecognition=rec;
-    activeButton=button;
-    expectedAbort=false;
-    let finalText="";
-    let hadUsefulResult=false;
-
+  function setButtonListening(button){
+    if(!button) return;
     button.classList.add("listening");
     button.disabled=false;
-    button.textContent="⏹ 듣는 중… 다시 누르면 중지";
-    target.textContent="듣고 있습니다…";
+    button.textContent="⏹ 듣는 중… 누르면 중지";
+  }
+  function cancelRestart(){
+    if(restartTimer){clearTimeout(restartTimer);restartTimer=null;}
+  }
+  function finishSession(save=true){
+    cancelRestart();
+    userListening=false;
+    starting=false;
+    const btn=activeButton;
+    const text=accumulatedText.trim();
+    if(save && text) addLog(activeWho,text);
+    setButtonIdle(btn);
+    recognition=null;
+    activeButton=null;
+    activeTarget=null;
+    activeLang="";
+    activeWho="";
+    retryCount=0;
+    accumulatedText="";
+    lastError="";
+  }
+  function stopListening(save=true){
+    userListening=false;
+    cancelRestart();
+    const rec=recognition;
+    recognition=null;
+    if(rec){
+      try{rec.onend=null;rec.onerror=null;rec.onresult=null;rec.abort();}catch(e){}
+    }
+    finishSession(save);
+  }
+  function scheduleRestart(id,delay=450){
+    cancelRestart();
+    if(!userListening || id!==sessionId || document.hidden) return;
+    if(retryCount>=MAX_AUTO_RETRIES){
+      if(activeTarget && !accumulatedText.trim()) activeTarget.textContent="음성 인식이 잠시 중단되었습니다. 버튼을 다시 눌러 주세요.";
+      finishSession(true);
+      return;
+    }
+    retryCount++;
+    restartTimer=setTimeout(()=>{
+      restartTimer=null;
+      if(userListening && id===sessionId) startRecognition(id);
+    },delay);
+  }
+  function startRecognition(id){
+    if(!SpeechRecognition || !userListening || id!==sessionId || starting) return;
+    starting=true;
+    lastError="";
+    const rec=new SpeechRecognition();
+    recognition=rec;
+    rec.lang=activeLang;
+    rec.interimResults=true;
+    // iOS Safari는 continuous=true에서 즉시 종료되는 경우가 있어 false + 안전 재시작을 사용합니다.
+    rec.continuous=false;
+    rec.maxAlternatives=1;
 
-    rec.onstart=()=>{ if(session===activeSession) isStarting=false; };
+    rec.onstart=()=>{
+      if(id!==sessionId) return;
+      starting=false;
+      retryCount=0;
+      setButtonListening(activeButton);
+      if(activeTarget && !accumulatedText) activeTarget.textContent="듣고 있습니다…";
+    };
     rec.onresult=(event)=>{
-      if(session!==activeSession) return;
+      if(id!==sessionId || !userListening) return;
       let interim="";
       for(let i=event.resultIndex;i<event.results.length;i++){
-        const t=event.results[i][0].transcript;
-        if(event.results[i].isFinal){finalText+=t;hadUsefulResult=true;}
-        else interim+=t;
+        const text=event.results[i][0]?.transcript||"";
+        if(event.results[i].isFinal){
+          accumulatedText=(accumulatedText+" "+text).trim();
+          retryCount=0;
+        }else interim+=text;
       }
-      target.textContent=(finalText||interim||"듣고 있습니다…").trim();
+      if(activeTarget) activeTarget.textContent=(accumulatedText+(interim?" "+interim:"")).trim()||"듣고 있습니다…";
     };
     rec.onerror=(event)=>{
-      if(session!==activeSession) return;
-      // 버튼 전환·사용자 중지로 발생한 aborted는 정상 종료이므로 오류로 표시하지 않습니다.
-      if(event.error==="aborted" && expectedAbort) return;
+      if(id!==sessionId) return;
+      starting=false;
+      lastError=event.error||"unknown";
+      // iPhone/Safari가 세션 전환 시 발생시키는 aborted는 사용자 오류가 아닙니다.
+      if(lastError==="aborted") return;
+      if(lastError==="no-speech"){
+        if(activeTarget && !accumulatedText) activeTarget.textContent="음성을 기다리는 중입니다…";
+        return;
+      }
       const msg={
-        "not-allowed":"마이크 사용 권한이 허용되지 않았습니다. 브라우저 설정에서 마이크를 허용해 주세요.",
-        "service-not-allowed":"이 브라우저의 음성 인식 서비스가 차단되었습니다.",
-        "no-speech":"음성이 들리지 않았습니다. 버튼을 다시 누르고 말해 주세요.",
-        "network":"음성 인식 네트워크 오류가 발생했습니다. 인터넷 연결을 확인해 주세요.",
-        "audio-capture":"마이크를 사용할 수 없습니다. 다른 앱의 마이크 사용을 종료해 주세요.",
-        "aborted":"음성 인식이 중단되었습니다. 잠시 후 다시 눌러 주세요."
-      }[event.error]||("음성 인식 오류: "+event.error);
-      target.textContent=msg;
+        "not-allowed":"마이크 권한이 꺼져 있습니다. Safari 설정에서 이 사이트의 마이크를 허용해 주세요.",
+        "service-not-allowed":"음성 인식 서비스 사용이 차단되어 있습니다.",
+        "network":"음성 인식 네트워크 연결이 불안정합니다. 잠시 후 자동으로 다시 시도합니다.",
+        "audio-capture":"마이크를 사용할 수 없습니다. 통화나 다른 녹음 앱을 종료해 주세요."
+      }[lastError];
+      if(msg && activeTarget && !accumulatedText) activeTarget.textContent=msg;
     };
     rec.onend=()=>{
-      if(session!==activeSession) return;
-      const text=target.textContent.trim();
-      if(hadUsefulResult && text && !text.includes("듣고") && !text.includes("오류") && !text.includes("권한") && !text.includes("들리지")) addLog(who,text);
-      clearActive(session);
+      if(id!==sessionId) return;
+      starting=false;
+      recognition=null;
+      if(!userListening) return;
+      if(lastError==="not-allowed" || lastError==="service-not-allowed" || lastError==="audio-capture"){
+        finishSession(true);
+        return;
+      }
+      // 결과가 있으면 한 문장 완료로 처리하여 자연스럽게 종료합니다.
+      if(accumulatedText.trim()){
+        finishSession(true);
+        return;
+      }
+      // 결과 없이 종료된 경우에만 짧게 자동 재시도합니다.
+      scheduleRestart(id,lastError==="network"?900:500);
     };
-
     try{rec.start();}
     catch(e){
-      if(session===activeSession){
-        target.textContent="음성 인식을 시작하지 못했습니다. 1초 후 다시 눌러 주세요.";
-        clearActive(session);
-      }
+      starting=false;
+      recognition=null;
+      scheduleRestart(id,700);
     }
-    // 일부 모바일 브라우저는 onstart를 누락하므로 잠금이 남지 않게 합니다.
-    setTimeout(()=>{if(session===activeSession)isStarting=false;},900);
+    setTimeout(()=>{if(id===sessionId)starting=false;},1200);
+  }
+  async function beginListening(lang,target,button,who){
+    if(!SpeechRecognition){
+      alert("이 브라우저에서는 음성 인식을 지원하지 않습니다. Safari 또는 Chrome 최신 버전을 사용해 주세요.");
+      return;
+    }
+    if(userListening && activeButton===button){stopListening(true);return;}
+    if(userListening) stopListening(true);
+    try{window.speechSynthesis?.cancel();}catch(e){}
+    await new Promise(r=>setTimeout(r,180));
+    sessionId++;
+    activeLang=lang;
+    activeTarget=target;
+    activeButton=button;
+    activeWho=who;
+    accumulatedText="";
+    retryCount=0;
+    lastError="";
+    userListening=true;
+    target.textContent="마이크를 시작하는 중입니다…";
+    setButtonListening(button);
+    startRecognition(sessionId);
   }
 
   if(support){
     support.textContent=SpeechRecognition
-      ?"✅ 이 브라우저에서 음성 인식을 사용할 수 있습니다. 최초 사용 시 마이크 권한을 허용하세요."
-      :"⚠️ 현재 브라우저에서 음성 인식이 지원되지 않습니다. 아래 Google 번역 또는 ChatGPT 음성을 사용하세요.";
+      ?"✅ 음성 인식을 사용할 수 있습니다. 버튼을 누른 뒤 마이크 권한을 허용하세요."
+      :"⚠️ 이 브라우저는 음성 인식을 지원하지 않습니다.";
   }
 
-  enBtn?.addEventListener("click",async()=>{
-    if(activeRecognition && activeButton===enBtn){await stopRecognition(true);clearActive();return;}
-    listen("en-US",enBox,enBtn,"상대방 영어");
-  });
-  koBtn?.addEventListener("click",async()=>{
-    if(activeRecognition && activeButton===koBtn){await stopRecognition(true);clearActive();return;}
-    listen("ko-KR",koBox,koBtn,"내 한국어");
-  });
-
-  document.addEventListener("visibilitychange",()=>{if(document.hidden)stopRecognition(true);});
-  window.addEventListener("pagehide",()=>stopRecognition(true));
+  enBtn?.addEventListener("click",()=>beginListening("en-US",enBox,enBtn,"상대방 영어"));
+  koBtn?.addEventListener("click",()=>beginListening("ko-KR",koBox,koBtn,"내 한국어"));
+  document.addEventListener("visibilitychange",()=>{if(document.hidden && userListening)stopListening(true);});
+  window.addEventListener("pagehide",()=>{if(userListening)stopListening(true);});
 
   document.getElementById("copyEnglishBtn")?.addEventListener("click",()=>{
     const t=enBox.textContent.trim();
@@ -2964,9 +3014,9 @@ renderCategories();renderPhrases();
 
 
 <script>
-/* TravelMate AI v20.0 — 새로고침 루프 제거 + 일정 상세/첨부파일 */
+/* TravelMate AI v20.1 — 새로고침 루프 제거 + 일정 상세/첨부파일 */
 (function(){
-  const APP_VERSION='20.0';
+  const APP_VERSION='20.1';
   const DB_NAME='travelmate_v18_data';
   const FILE_STORE='files';
   const DETAIL_STORE='details';
@@ -3120,7 +3170,7 @@ renderCategories();renderPhrases();
 
 
 <script>
-/* TravelMate AI v20.0 — 일정 추가·수정·삭제 */
+/* TravelMate AI v20.1 — 일정 추가·수정·삭제 */
 (function(){
   const STORE='travelmate_v19_schedule_changes';
   let editingCard=null, activePanel=null;
