@@ -309,12 +309,28 @@ textarea{width:100%;box-sizing:border-box;border:1px solid #d8e3e5;border-radius
 .update-toast.show{display:flex}.update-toast button{border:0;border-radius:10px;padding:8px 11px;font-weight:900;cursor:pointer}
 @media(max-width:520px){.attachment-row{align-items:flex-start}.attachment-actions{flex-direction:column}}
 
+
+/* v18 일정 상세·첨부파일 */
+.schedule-detail-btn{margin-left:auto;background:#fff7e6;border-color:#efb44d;color:#754900;font-weight:900}
+.schedule-detail-btn .file-badge{display:inline-flex;min-width:19px;height:19px;padding:0 5px;align-items:center;justify-content:center;border-radius:999px;background:#0a8791;color:#fff;font-size:11px}
+.v18-modal-backdrop{position:fixed;inset:0;background:rgba(5,25,31,.62);display:none;align-items:flex-end;justify-content:center;z-index:9999;padding:0}
+.v18-modal-backdrop.show{display:flex}
+.v18-modal{width:min(720px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:24px 24px 0 0;padding:20px;box-shadow:0 -15px 50px rgba(0,0,0,.25)}
+.v18-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:sticky;top:-20px;background:#fff;padding:2px 0 12px;z-index:2;border-bottom:1px solid var(--line)}
+.v18-modal-title{margin:0;font-size:20px}.v18-modal-sub{color:var(--muted);font-size:13px;margin-top:5px}.v18-close{font-size:20px;min-width:42px}
+.v18-section{padding:16px 0;border-bottom:1px solid var(--line)}.v18-section:last-child{border-bottom:0}
+.v18-section h3{margin:0 0 10px;font-size:15px}.v18-field{display:grid;gap:6px;margin-top:10px}.v18-field label{font-size:12px;font-weight:850;color:var(--muted)}
+.v18-field input,.v18-field textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fbfdfd}.v18-field textarea{min-height:90px;resize:vertical}
+.v18-save-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.v18-upload{display:inline-flex;align-items:center;gap:7px;cursor:pointer}.v18-upload input{display:none}
+.v18-file-list{display:grid;gap:8px;margin-top:10px}.v18-file{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#f8fbfb}.v18-file-main{min-width:0;flex:1}.v18-file-name{font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v18-file-meta{font-size:11px;color:var(--muted);margin-top:3px}.v18-file-actions{display:flex;gap:5px}.v18-empty{padding:15px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.v18-sync-note{font-size:12px;color:var(--muted);line-height:1.55;background:#f3f8f8;padding:10px;border-radius:12px;margin-top:10px}
+@media(min-width:721px){.v18-modal-backdrop{align-items:center;padding:24px}.v18-modal{border-radius:24px}.v18-modal-head{top:-20px}}
 </style>
 <script src="./config.js"></script>
 </head>
 <body>
 <input class="day-radio" type="radio" name="day" id="day0" checked><input class="day-radio" type="radio" name="day" id="day1"><input class="day-radio" type="radio" name="day" id="day2"><input class="day-radio" type="radio" name="day" id="day3"><input class="day-radio" type="radio" name="day" id="day4"><input class="day-radio" type="radio" name="day" id="day5"><input class="day-radio" type="radio" name="day" id="day6"><input class="day-radio" type="radio" name="day" id="day7"><input class="day-radio" type="radio" name="day" id="day8">
-<div class="app"><div class="version-banner">✅ Hawaii App v17.3 · 자동 업데이트 · 일정별 첨부파일</div>
+<div class="app"><div class="version-banner">✅ TravelMate AI v18.0 · 자동 업데이트 · 일정 상세 · 첨부파일</div>
 <header class="hero">
   <div class="eyebrow">MY TRIP AGENT</div>
   <h1>🌺 TravelMate AI</h1>
@@ -2942,128 +2958,93 @@ if("serviceWorker" in navigator){
 
 
 <script>
-/* v17.3 자동 업데이트 + 일정별 첨부파일 */
+/* TravelMate AI v18.0 — 자동 업데이트 + 일정 상세/첨부파일 */
 (function(){
-  const APP_VERSION='17.3';
+  const APP_VERSION='18.0';
+  const DB_NAME='travelmate_v18_data';
+  const FILE_STORE='files';
+  const DETAIL_STORE='details';
+  const MAX_FILE_SIZE=20*1024*1024;
+  let dbPromise, activeCard=null, refreshing=false;
 
-  // 새 배포가 감지되면 대기 없이 활성화하고 한 번만 새로고침합니다.
+  // GitHub Pages 새 배포 자동 반영
   if('serviceWorker' in navigator){
-    let refreshing=false;
-    const showUpdateToast=()=>{
-      let toast=document.getElementById('updateToastV173');
-      if(!toast){
-        toast=document.createElement('div');
-        toast.id='updateToastV173';
-        toast.className='update-toast';
-        toast.innerHTML='<span>새 버전을 적용하고 있습니다…</span><button type="button">지금 새로고침</button>';
-        toast.querySelector('button').onclick=()=>location.reload();
-        document.body.appendChild(toast);
-      }
-      toast.classList.add('show');
+    const showToast=()=>{
+      let t=document.getElementById('updateToastV18');
+      if(!t){t=document.createElement('div');t.id='updateToastV18';t.className='update-toast';t.innerHTML='<span>새 버전을 적용하고 있습니다…</span><button type="button">새로고침</button>';t.querySelector('button').onclick=()=>location.reload();document.body.appendChild(t)}
+      t.classList.add('show');
     };
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{
-      if(refreshing)return;
-      refreshing=true;
-      showUpdateToast();
-      setTimeout(()=>location.reload(),500);
-    });
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;showToast();setTimeout(()=>location.reload(),600)});
     window.addEventListener('load',async()=>{
       try{
         const reg=await navigator.serviceWorker.register('./sw.js?v='+APP_VERSION,{updateViaCache:'none'});
-        const activate=worker=>{ if(worker) worker.postMessage({type:'SKIP_WAITING'}); };
-        if(reg.waiting) activate(reg.waiting);
-        reg.addEventListener('updatefound',()=>{
-          const worker=reg.installing;
-          if(!worker)return;
-          worker.addEventListener('statechange',()=>{
-            if(worker.state==='installed' && navigator.serviceWorker.controller){
-              showUpdateToast();
-              activate(worker);
-            }
-          });
-        });
+        const activate=w=>w&&w.postMessage({type:'SKIP_WAITING'});
+        if(reg.waiting)activate(reg.waiting);
+        reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller){showToast();activate(w)}})});
         await reg.update();
-        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});
+        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{})});
         setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
-      }catch(e){console.warn('자동 업데이트 확인 실패',e);}
+      }catch(e){console.warn('자동 업데이트 확인 실패',e)}
     });
   }
 
-  // 첨부파일은 IndexedDB에 원본 Blob으로 저장합니다.
-  const DB_NAME='travelmate_schedule_files_v1';
-  const STORE='files';
-  const MAX_FILE_SIZE=20*1024*1024;
-  let dbPromise;
   function openDB(){
     if(dbPromise)return dbPromise;
     dbPromise=new Promise((resolve,reject)=>{
       const req=indexedDB.open(DB_NAME,1);
       req.onupgradeneeded=()=>{
         const db=req.result;
-        if(!db.objectStoreNames.contains(STORE)){
-          const st=db.createObjectStore(STORE,{keyPath:'id'});
-          st.createIndex('scheduleKey','scheduleKey',{unique:false});
-        }
+        if(!db.objectStoreNames.contains(FILE_STORE)){const st=db.createObjectStore(FILE_STORE,{keyPath:'id'});st.createIndex('scheduleKey','scheduleKey',{unique:false})}
+        if(!db.objectStoreNames.contains(DETAIL_STORE))db.createObjectStore(DETAIL_STORE,{keyPath:'scheduleKey'});
       };
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
     });
     return dbPromise;
   }
-  async function addFile(scheduleKey,file){
-    const db=await openDB();
-    const item={id:scheduleKey+'_'+Date.now()+'_'+Math.random().toString(36).slice(2),scheduleKey,name:file.name,type:file.type||'application/octet-stream',size:file.size,updatedAt:Date.now(),blob:file};
-    return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(item);tx.oncomplete=()=>resolve(item);tx.onerror=()=>reject(tx.error);});
+  async function getDetails(key){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(DETAIL_STORE).objectStore(DETAIL_STORE).get(key);r.onsuccess=()=>res(r.result||{scheduleKey:key,memo:'',reservation:'',phone:'',url:''});r.onerror=()=>rej(r.error)})}
+  async function saveDetails(item){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(DETAIL_STORE,'readwrite');tx.objectStore(DETAIL_STORE).put({...item,updatedAt:Date.now()});tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+  async function listFiles(key){const db=await openDB();return new Promise((res,rej)=>{const r=db.transaction(FILE_STORE).objectStore(FILE_STORE).index('scheduleKey').getAll(key);r.onsuccess=()=>res((r.result||[]).sort((a,b)=>b.updatedAt-a.updatedAt));r.onerror=()=>rej(r.error)})}
+  async function addFile(key,file){const db=await openDB();const item={id:key+'_'+Date.now()+'_'+Math.random().toString(36).slice(2),scheduleKey:key,name:file.name,type:file.type||'application/octet-stream',size:file.size,updatedAt:Date.now(),blob:file};return new Promise((res,rej)=>{const tx=db.transaction(FILE_STORE,'readwrite');tx.objectStore(FILE_STORE).put(item);tx.oncomplete=()=>res(item);tx.onerror=()=>rej(tx.error)})}
+  async function deleteFile(id){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(FILE_STORE,'readwrite');tx.objectStore(FILE_STORE).delete(id);tx.oncomplete=res;tx.onerror=()=>rej(tx.error)})}
+  const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const size=n=>n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':(n/1048576).toFixed(1)+' MB';
+
+  function ensureModal(){
+    if(document.getElementById('v18ModalBackdrop'))return;
+    const wrap=document.createElement('div');wrap.id='v18ModalBackdrop';wrap.className='v18-modal-backdrop';wrap.innerHTML=`<div class="v18-modal" role="dialog" aria-modal="true"><div class="v18-modal-head"><div><h2 class="v18-modal-title" id="v18Title">일정 상세</h2><div class="v18-modal-sub" id="v18Sub"></div></div><button class="btn ghost v18-close" type="button" aria-label="닫기">✕</button></div><section class="v18-section"><h3>📝 일정 정보</h3><div class="v18-field"><label>예약번호</label><input id="v18Reservation" placeholder="예: ABC12345"></div><div class="v18-field"><label>연락처</label><input id="v18Phone" placeholder="호텔·렌터카·식당 연락처"></div><div class="v18-field"><label>홈페이지 또는 바우처 링크</label><input id="v18Url" type="url" placeholder="https://..."></div><div class="v18-field"><label>메모</label><textarea id="v18Memo" placeholder="준비물, 주차 위치, 확인사항 등을 기록하세요."></textarea></div><div class="v18-save-row"><button id="v18Save" class="btn primary" type="button">저장</button><button id="v18OpenUrl" class="btn ghost" type="button">링크 열기</button></div></section><section class="v18-section"><h3>📎 첨부파일 <span id="v18Count" class="pill">0개</span></h3><label class="btn secondary v18-upload">파일 추가<input id="v18FileInput" type="file" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,text/plain"></label><div class="v18-sync-note">첨부파일은 이 기기의 앱 저장공간에 보관됩니다. 앱 업데이트 후에도 유지되지만 다른 휴대폰과 자동 동기화되지는 않습니다.</div><div id="v18Files" class="v18-file-list"></div></section></div>`;
+    document.body.appendChild(wrap);
+    const close=()=>{wrap.classList.remove('show');activeCard=null};
+    wrap.querySelector('.v18-close').onclick=close;wrap.addEventListener('click',e=>{if(e.target===wrap)close()});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+    document.getElementById('v18Save').onclick=saveActive;
+    document.getElementById('v18OpenUrl').onclick=()=>{const u=document.getElementById('v18Url').value.trim();if(!u)return alert('링크를 먼저 입력해 주세요.');window.open(/^https?:\/\//i.test(u)?u:'https://'+u,'_blank','noopener')};
+    document.getElementById('v18FileInput').addEventListener('change',uploadActive);
   }
-  async function listFiles(scheduleKey){
-    const db=await openDB();
-    return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).index('scheduleKey').getAll(scheduleKey);req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>b.updatedAt-a.updatedAt));req.onerror=()=>reject(req.error);});
+  async function updateBadge(card){const files=await listFiles(card.dataset.doneKey);const b=card.querySelector('.file-badge');if(b)b.textContent=files.length}
+  async function openDetail(card){
+    ensureModal();activeCard=card;const key=card.dataset.doneKey;const place=card.querySelector('.place')?.textContent.trim()||'일정';const time=card.querySelector('.time')?.textContent.trim()||'';
+    document.getElementById('v18Title').textContent=place;document.getElementById('v18Sub').textContent=time;
+    const d=await getDetails(key);document.getElementById('v18Reservation').value=d.reservation||'';document.getElementById('v18Phone').value=d.phone||'';document.getElementById('v18Url').value=d.url||'';document.getElementById('v18Memo').value=d.memo||'';
+    await renderActiveFiles();document.getElementById('v18ModalBackdrop').classList.add('show');
   }
-  async function removeFile(id){
-    const db=await openDB();
-    return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+  async function saveActive(){if(!activeCard)return;await saveDetails({scheduleKey:activeCard.dataset.doneKey,reservation:document.getElementById('v18Reservation').value.trim(),phone:document.getElementById('v18Phone').value.trim(),url:document.getElementById('v18Url').value.trim(),memo:document.getElementById('v18Memo').value.trim()});const b=document.getElementById('v18Save');const old=b.textContent;b.textContent='저장 완료 ✓';setTimeout(()=>b.textContent=old,1200)}
+  async function uploadActive(e){if(!activeCard)return;const input=e.currentTarget;const files=[...(input.files||[])];for(const f of files){if(f.size>MAX_FILE_SIZE){alert('파일당 최대 20MB입니다: '+f.name);continue}await addFile(activeCard.dataset.doneKey,f)}input.value='';await renderActiveFiles();await updateBadge(activeCard)}
+  async function renderActiveFiles(){
+    if(!activeCard)return;const files=await listFiles(activeCard.dataset.doneKey);document.getElementById('v18Count').textContent=files.length+'개';const root=document.getElementById('v18Files');
+    if(!files.length){root.innerHTML='<div class="v18-empty">아직 첨부된 파일이 없습니다.</div>';return}
+    root.innerHTML=files.map(f=>`<div class="v18-file"><div class="v18-file-main"><div class="v18-file-name">${f.type.startsWith('image/')?'🖼️':'📄'} ${esc(f.name)}</div><div class="v18-file-meta">${size(f.size)} · ${new Date(f.updatedAt).toLocaleString('ko-KR')}</div></div><div class="v18-file-actions"><button class="btn secondary" data-open="${f.id}" type="button">열기</button><button class="btn ghost" data-del="${f.id}" type="button">삭제</button></div></div>`).join('');
+    root.querySelectorAll('[data-open]').forEach(btn=>btn.onclick=()=>{const f=files.find(x=>x.id===btn.dataset.open);if(!f)return;const u=URL.createObjectURL(f.blob);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),120000)});
+    root.querySelectorAll('[data-del]').forEach(btn=>btn.onclick=async()=>{const f=files.find(x=>x.id===btn.dataset.del);if(!f||!confirm('"'+f.name+'" 파일을 삭제할까요?'))return;await deleteFile(f.id);await renderActiveFiles();await updateBadge(activeCard)});
   }
-  function formatSize(n){if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';return (n/1024/1024).toFixed(1)+' MB';}
-  function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-  async function renderFiles(key,root){
-    const list=root.querySelector('.attachment-list');
-    const count=root.querySelector('.attachment-count');
-    try{
-      const files=await listFiles(key);
-      count.textContent=files.length?files.length+'개 저장됨':'첨부 없음';
-      list.innerHTML=files.map(f=>`<div class="attachment-row"><div class="attachment-info"><div class="attachment-name">📎 ${escapeHtml(f.name)}</div><div class="attachment-meta">${formatSize(f.size)} · ${new Date(f.updatedAt).toLocaleString('ko-KR')}</div></div><div class="attachment-actions"><button class="btn secondary" type="button" data-open-file="${f.id}">열기</button><button class="btn ghost" type="button" data-delete-file="${f.id}">삭제</button></div></div>`).join('');
-      list.querySelectorAll('[data-open-file]').forEach(btn=>btn.onclick=()=>{
-        const f=files.find(x=>x.id===btn.dataset.openFile);if(!f)return;
-        const url=URL.createObjectURL(f.blob);window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000);
-      });
-      list.querySelectorAll('[data-delete-file]').forEach(btn=>btn.onclick=async()=>{
-        const f=files.find(x=>x.id===btn.dataset.deleteFile);if(!f||!confirm('"'+f.name+'" 파일을 삭제할까요?'))return;
-        await removeFile(f.id);renderFiles(key,root);
-      });
-    }catch(e){count.textContent='저장소 사용 불가';console.error(e);}
-  }
-  function initAttachments(){
+  function init(){
+    ensureModal();
     document.querySelectorAll('#schedulePage article.item[data-done-key]').forEach(card=>{
-      if(card.querySelector('.schedule-attachments'))return;
-      const key=card.dataset.doneKey;
-      const root=document.createElement('div');
-      root.className='schedule-attachments';
-      root.innerHTML=`<div class="attachment-toolbar"><label class="btn secondary attachment-upload-btn">📎 첨부파일 추가<input type="file" multiple></label><span class="attachment-count">확인 중…</span></div><div class="attachment-list"></div>`;
-      card.appendChild(root);
-      const input=root.querySelector('input[type=file]');
-      input.addEventListener('change',async()=>{
-        const files=[...(input.files||[])];
-        if(!files.length)return;
-        const tooLarge=files.find(f=>f.size>MAX_FILE_SIZE);
-        if(tooLarge){alert('파일당 최대 20MB까지 저장할 수 있습니다.\n초과 파일: '+tooLarge.name);input.value='';return;}
-        const label=root.querySelector('.attachment-count');label.textContent='저장 중…';
-        try{for(const f of files)await addFile(key,f);await renderFiles(key,root);}catch(e){alert('첨부파일을 저장하지 못했습니다. 기기 저장공간을 확인해 주세요.');console.error(e);}
-        input.value='';
-      });
-      renderFiles(key,root);
+      let actions=card.querySelector('.actions');if(!actions){actions=document.createElement('div');actions.className='actions';card.appendChild(actions)}
+      if(actions.querySelector('.schedule-detail-btn'))return;
+      const btn=document.createElement('button');btn.type='button';btn.className='btn schedule-detail-btn';btn.innerHTML='📎 첨부·메모 <span class="file-badge">0</span>';btn.onclick=()=>openDetail(card);actions.insertBefore(btn,actions.firstChild);updateBadge(card).catch(()=>{});
     });
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initAttachments);else initAttachments();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 
