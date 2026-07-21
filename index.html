@@ -294,12 +294,27 @@ textarea{width:100%;box-sizing:border-box;border:1px solid #d8e3e5;border-radius
   .nav{grid-template-columns:repeat(5,minmax(64px,1fr))!important}
 }
 
+
+/* v17.3 일정별 첨부파일 */
+.schedule-attachments{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.attachment-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.attachment-upload-btn{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.attachment-upload-btn input{display:none}
+.attachment-count{font-size:12px;color:var(--muted);font-weight:800}
+.attachment-list{display:grid;gap:7px;margin-top:9px}
+.attachment-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:#f8fbfb}
+.attachment-info{min-width:0;flex:1}.attachment-name{font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.attachment-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.attachment-actions{display:flex;gap:5px;flex-shrink:0}.attachment-actions button{padding:7px 9px;font-size:12px}
+.update-toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:9999;width:min(92vw,520px);padding:13px 15px;border-radius:15px;background:#17323a;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.25);display:none;align-items:center;justify-content:space-between;gap:10px;font-weight:800}
+.update-toast.show{display:flex}.update-toast button{border:0;border-radius:10px;padding:8px 11px;font-weight:900;cursor:pointer}
+@media(max-width:520px){.attachment-row{align-items:flex-start}.attachment-actions{flex-direction:column}}
+
 </style>
 <script src="./config.js"></script>
 </head>
 <body>
 <input class="day-radio" type="radio" name="day" id="day0" checked><input class="day-radio" type="radio" name="day" id="day1"><input class="day-radio" type="radio" name="day" id="day2"><input class="day-radio" type="radio" name="day" id="day3"><input class="day-radio" type="radio" name="day" id="day4"><input class="day-radio" type="radio" name="day" id="day5"><input class="day-radio" type="radio" name="day" id="day6"><input class="day-radio" type="radio" name="day" id="day7"><input class="day-radio" type="radio" name="day" id="day8">
-<div class="app"><div class="version-banner">✅ Hawaii App v17.1 Stable Slim · AI 여행 비서 · GPT 통역 적용됨</div>
+<div class="app"><div class="version-banner">✅ Hawaii App v17.3 · 자동 업데이트 · 일정별 첨부파일</div>
 <header class="hero">
   <div class="eyebrow">MY TRIP AGENT</div>
   <h1>🌺 TravelMate AI</h1>
@@ -2922,6 +2937,133 @@ if("serviceWorker" in navigator){
   const meta=document.getElementById("currentTripMeta");
   if(label) label.textContent=fixedTrip.name;
   if(meta) meta.textContent="Honolulu · United States · USD";
+})();
+</script>
+
+
+<script>
+/* v17.3 자동 업데이트 + 일정별 첨부파일 */
+(function(){
+  const APP_VERSION='17.3';
+
+  // 새 배포가 감지되면 대기 없이 활성화하고 한 번만 새로고침합니다.
+  if('serviceWorker' in navigator){
+    let refreshing=false;
+    const showUpdateToast=()=>{
+      let toast=document.getElementById('updateToastV173');
+      if(!toast){
+        toast=document.createElement('div');
+        toast.id='updateToastV173';
+        toast.className='update-toast';
+        toast.innerHTML='<span>새 버전을 적용하고 있습니다…</span><button type="button">지금 새로고침</button>';
+        toast.querySelector('button').onclick=()=>location.reload();
+        document.body.appendChild(toast);
+      }
+      toast.classList.add('show');
+    };
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(refreshing)return;
+      refreshing=true;
+      showUpdateToast();
+      setTimeout(()=>location.reload(),500);
+    });
+    window.addEventListener('load',async()=>{
+      try{
+        const reg=await navigator.serviceWorker.register('./sw.js?v='+APP_VERSION,{updateViaCache:'none'});
+        const activate=worker=>{ if(worker) worker.postMessage({type:'SKIP_WAITING'}); };
+        if(reg.waiting) activate(reg.waiting);
+        reg.addEventListener('updatefound',()=>{
+          const worker=reg.installing;
+          if(!worker)return;
+          worker.addEventListener('statechange',()=>{
+            if(worker.state==='installed' && navigator.serviceWorker.controller){
+              showUpdateToast();
+              activate(worker);
+            }
+          });
+        });
+        await reg.update();
+        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{});});
+        setInterval(()=>reg.update().catch(()=>{}),60*60*1000);
+      }catch(e){console.warn('자동 업데이트 확인 실패',e);}
+    });
+  }
+
+  // 첨부파일은 IndexedDB에 원본 Blob으로 저장합니다.
+  const DB_NAME='travelmate_schedule_files_v1';
+  const STORE='files';
+  const MAX_FILE_SIZE=20*1024*1024;
+  let dbPromise;
+  function openDB(){
+    if(dbPromise)return dbPromise;
+    dbPromise=new Promise((resolve,reject)=>{
+      const req=indexedDB.open(DB_NAME,1);
+      req.onupgradeneeded=()=>{
+        const db=req.result;
+        if(!db.objectStoreNames.contains(STORE)){
+          const st=db.createObjectStore(STORE,{keyPath:'id'});
+          st.createIndex('scheduleKey','scheduleKey',{unique:false});
+        }
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+    return dbPromise;
+  }
+  async function addFile(scheduleKey,file){
+    const db=await openDB();
+    const item={id:scheduleKey+'_'+Date.now()+'_'+Math.random().toString(36).slice(2),scheduleKey,name:file.name,type:file.type||'application/octet-stream',size:file.size,updatedAt:Date.now(),blob:file};
+    return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).put(item);tx.oncomplete=()=>resolve(item);tx.onerror=()=>reject(tx.error);});
+  }
+  async function listFiles(scheduleKey){
+    const db=await openDB();
+    return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readonly');const req=tx.objectStore(STORE).index('scheduleKey').getAll(scheduleKey);req.onsuccess=()=>resolve((req.result||[]).sort((a,b)=>b.updatedAt-a.updatedAt));req.onerror=()=>reject(req.error);});
+  }
+  async function removeFile(id){
+    const db=await openDB();
+    return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite');tx.objectStore(STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+  }
+  function formatSize(n){if(n<1024)return n+' B';if(n<1024*1024)return (n/1024).toFixed(1)+' KB';return (n/1024/1024).toFixed(1)+' MB';}
+  function escapeHtml(v){return String(v).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+  async function renderFiles(key,root){
+    const list=root.querySelector('.attachment-list');
+    const count=root.querySelector('.attachment-count');
+    try{
+      const files=await listFiles(key);
+      count.textContent=files.length?files.length+'개 저장됨':'첨부 없음';
+      list.innerHTML=files.map(f=>`<div class="attachment-row"><div class="attachment-info"><div class="attachment-name">📎 ${escapeHtml(f.name)}</div><div class="attachment-meta">${formatSize(f.size)} · ${new Date(f.updatedAt).toLocaleString('ko-KR')}</div></div><div class="attachment-actions"><button class="btn secondary" type="button" data-open-file="${f.id}">열기</button><button class="btn ghost" type="button" data-delete-file="${f.id}">삭제</button></div></div>`).join('');
+      list.querySelectorAll('[data-open-file]').forEach(btn=>btn.onclick=()=>{
+        const f=files.find(x=>x.id===btn.dataset.openFile);if(!f)return;
+        const url=URL.createObjectURL(f.blob);window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),60000);
+      });
+      list.querySelectorAll('[data-delete-file]').forEach(btn=>btn.onclick=async()=>{
+        const f=files.find(x=>x.id===btn.dataset.deleteFile);if(!f||!confirm('"'+f.name+'" 파일을 삭제할까요?'))return;
+        await removeFile(f.id);renderFiles(key,root);
+      });
+    }catch(e){count.textContent='저장소 사용 불가';console.error(e);}
+  }
+  function initAttachments(){
+    document.querySelectorAll('#schedulePage article.item[data-done-key]').forEach(card=>{
+      if(card.querySelector('.schedule-attachments'))return;
+      const key=card.dataset.doneKey;
+      const root=document.createElement('div');
+      root.className='schedule-attachments';
+      root.innerHTML=`<div class="attachment-toolbar"><label class="btn secondary attachment-upload-btn">📎 첨부파일 추가<input type="file" multiple></label><span class="attachment-count">확인 중…</span></div><div class="attachment-list"></div>`;
+      card.appendChild(root);
+      const input=root.querySelector('input[type=file]');
+      input.addEventListener('change',async()=>{
+        const files=[...(input.files||[])];
+        if(!files.length)return;
+        const tooLarge=files.find(f=>f.size>MAX_FILE_SIZE);
+        if(tooLarge){alert('파일당 최대 20MB까지 저장할 수 있습니다.\n초과 파일: '+tooLarge.name);input.value='';return;}
+        const label=root.querySelector('.attachment-count');label.textContent='저장 중…';
+        try{for(const f of files)await addFile(key,f);await renderFiles(key,root);}catch(e){alert('첨부파일을 저장하지 못했습니다. 기기 저장공간을 확인해 주세요.');console.error(e);}
+        input.value='';
+      });
+      renderFiles(key,root);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initAttachments);else initAttachments();
 })();
 </script>
 
