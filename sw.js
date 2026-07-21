@@ -1,4 +1,4 @@
-const CACHE_NAME='travelmate-v20-1';
+const CACHE_NAME='travelmate-v20-2';
 const CORE=['./','./index.html','./config.js','./manifest.webmanifest','./icon-192.png','./icon-512.png','./apple-touch-icon.png','./favicon.ico'];
 
 self.addEventListener('install',event=>{
