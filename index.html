@@ -339,7 +339,7 @@ textarea{width:100%;box-sizing:border-box;border:1px solid #d8e3e5;border-radius
 
 /* v19 일정 편집 */
 .schedule-manage-bar{display:flex;justify-content:flex-end;margin:12px 0 4px}.schedule-add-btn{font-weight:900}
-.schedule-edit-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.schedule-edit-actions button{padding:7px 9px;font-size:12px}
+.schedule-edit-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}.schedule-edit-actions button{padding:8px 10px;font-size:12px}.schedule-edit-actions .v19-insert{margin-left:auto;background:#e9fbf8;border-color:#9ddbd5;color:#086c73;font-weight:900}.schedule-edit-actions button:disabled{opacity:.38;cursor:not-allowed}
 .v19-modal-backdrop{position:fixed;inset:0;background:rgba(8,24,30,.58);z-index:10030;display:none;align-items:center;justify-content:center;padding:16px}.v19-modal-backdrop.show{display:flex}
 .v19-modal{width:min(620px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:22px;box-shadow:0 24px 70px rgba(0,0,0,.28);padding:20px}
 .v19-modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.v19-modal-head h2{margin:0}
@@ -3211,12 +3211,13 @@ renderCategories();renderPhrases();
 
 
 <script>
-/* TravelMate AI v20.0 — 일정 추가·수정·삭제 */
+/* TravelMate AI v22.0 — 일정 추가·중간 삽입·순서 변경 */
 (function(){
   const STORE='travelmate_v19_schedule_changes';
-  let editingCard=null, activePanel=null;
+  let editingCard=null, activePanel=null, insertAfterCard=null;
   const esc=v=>String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const load=()=>{try{return JSON.parse(localStorage.getItem(STORE)||'{"custom":[],"edited":{},"deleted":[]}')}catch{return {custom:[],edited:{},deleted:[]}}};
+  const empty=()=>({custom:[],edited:{},deleted:[],orders:{}});
+  const load=()=>{try{const v=JSON.parse(localStorage.getItem(STORE)||'{}');return {...empty(),...v,orders:v.orders||{}}}catch{return empty()}};
   const save=v=>localStorage.setItem(STORE,JSON.stringify(v));
   const uid=()=> 'custom_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
   function modal(){
@@ -3227,8 +3228,8 @@ renderCategories();renderPhrases();
     return w;
   }
   const value=id=>document.getElementById(id).value.trim();
-  function openEditor(panel,card=null){
-    activePanel=panel;editingCard=card;modal();document.getElementById('v19ModalTitle').textContent=card?'일정 수정':'일정 추가';
+  function openEditor(panel,card=null,afterCard=null){
+    activePanel=panel;editingCard=card;insertAfterCard=afterCard;modal();document.getElementById('v19ModalTitle').textContent=card?'일정 수정':afterCard?'이 일정 다음에 추가':'일정 추가';
     let st='',en='',pl='',no='',mp='';
     if(card){const t=card.querySelector('.time')?.textContent.trim()||'';[st,en]=t.split('~').map(x=>x?.trim()||'');pl=card.querySelector('.place')?.textContent.trim()||'';no=card.querySelector('.note')?.textContent.trim()||'';mp=card.dataset.mapQuery||pl}
     document.getElementById('v19Start').value=/^\d\d:\d\d$/.test(st)?st:'';document.getElementById('v19End').value=/^\d\d:\d\d$/.test(en)?en:'';document.getElementById('v19Place').value=pl;document.getElementById('v19Note').value=no;document.getElementById('v19Map').value=mp;
@@ -3239,17 +3240,22 @@ renderCategories();renderPhrases();
     const a=document.createElement('article');a.className='item';a.dataset.doneKey=d.key;a.dataset.mapQuery=d.map||d.place;a.innerHTML=`<div class="dot"></div><div class="time">${esc(d.time)}</div><div class="place">${esc(d.place)}</div><div class="note">${esc(d.note)}</div><div class="actions"><a class="btn secondary" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.map||d.place)}">📍 지도</a><label class="done-label"><input class="persist-check" type="checkbox"> 완료</label></div>`;return a;
   }
   function addManage(card){
-    if(card.querySelector('.schedule-edit-actions'))return;const x=document.createElement('div');x.className='schedule-edit-actions';x.innerHTML='<button class="btn ghost v19-edit" type="button">✏️ 수정</button><button class="btn ghost v19-delete" type="button">🗑 삭제</button>';card.appendChild(x);x.querySelector('.v19-edit').onclick=()=>openEditor(card.closest('.day-panel'),card);x.querySelector('.v19-delete').onclick=()=>removeCard(card);window.TravelMateAttachments?.bindCard(card);
+    if(card.querySelector('.schedule-edit-actions'))return;const x=document.createElement('div');x.className='schedule-edit-actions';x.innerHTML='<button class="btn ghost v19-up" type="button" aria-label="이 일정을 위로 이동">↑ 위로</button><button class="btn ghost v19-down" type="button" aria-label="이 일정을 아래로 이동">↓ 아래로</button><button class="btn ghost v19-edit" type="button">✏️ 수정</button><button class="btn ghost v19-delete" type="button">🗑 삭제</button><button class="btn v19-insert" type="button">＋ 여기에 추가</button>';card.appendChild(x);x.querySelector('.v19-up').onclick=()=>moveCard(card,-1);x.querySelector('.v19-down').onclick=()=>moveCard(card,1);x.querySelector('.v19-edit').onclick=()=>openEditor(card.closest('.day-panel'),card);x.querySelector('.v19-delete').onclick=()=>removeCard(card);x.querySelector('.v19-insert').onclick=()=>openEditor(card.closest('.day-panel'),null,card);window.TravelMateAttachments?.bindCard(card);refreshMoveButtons(card.closest('.day-panel'));
   }
+  function panelIndex(panel){return [...document.querySelectorAll('.day-panel')].indexOf(panel)}
+  function panelCards(panel){return [...panel.querySelectorAll('.timeline > article.item[data-done-key]')]}
+  function rememberOrder(panel,state=load()){state.orders[panelIndex(panel)]=panelCards(panel).map(c=>c.dataset.doneKey);save(state);return state}
+  function refreshMoveButtons(panel){if(!panel)return;const cards=panelCards(panel);cards.forEach((c,i)=>{const up=c.querySelector('.v19-up'),down=c.querySelector('.v19-down');if(up)up.disabled=i===0;if(down)down.disabled=i===cards.length-1})}
+  function moveCard(card,direction){const panel=card.closest('.day-panel'),cards=panelCards(panel),i=cards.indexOf(card),target=cards[i+direction];if(!target)return;const timeline=panel.querySelector('.timeline');if(direction<0)timeline.insertBefore(card,target);else timeline.insertBefore(target,card);rememberOrder(panel);refreshMoveButtons(panel);if(typeof updateHomeDashboard==='function')updateHomeDashboard()}
   function saveSchedule(){
     const place=value('v19Place');if(!place)return alert('일정명을 입력하세요.');const start=value('v19Start'),end=value('v19End');const d={time:start+(end?'~'+end:''),place,note:value('v19Note'),map:value('v19Map')||place};const state=load();
-    if(editingCard){Object.assign(d,{key:editingCard.dataset.doneKey,panel:[...document.querySelectorAll('.day-panel')].indexOf(activePanel)});editingCard.querySelector('.time').textContent=d.time;editingCard.querySelector('.place').textContent=d.place;editingCard.querySelector('.note').textContent=d.note;editingCard.dataset.mapQuery=d.map;const link=editingCard.querySelector('.actions a');if(link)link.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(d.map);state.edited[d.key]=d;const ci=state.custom.findIndex(x=>x.key===d.key);if(ci>=0)state.custom[ci]=d;
-    }else{d.key=uid();d.panel=[...document.querySelectorAll('.day-panel')].indexOf(activePanel);state.custom.push(d);const c=renderCard(d);activePanel.querySelector('.timeline').appendChild(c);addManage(c)}
-    save(state);document.getElementById('v19ScheduleModal').classList.remove('show');updateCounts();
+    if(editingCard){Object.assign(d,{key:editingCard.dataset.doneKey,panel:panelIndex(activePanel)});editingCard.querySelector('.time').textContent=d.time;editingCard.querySelector('.place').textContent=d.place;editingCard.querySelector('.note').textContent=d.note;editingCard.dataset.mapQuery=d.map;const link=editingCard.querySelector('.actions a');if(link)link.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(d.map);state.edited[d.key]=d;const ci=state.custom.findIndex(x=>x.key===d.key);if(ci>=0)state.custom[ci]=d;
+    }else{d.key=uid();d.panel=panelIndex(activePanel);state.custom.push(d);const c=renderCard(d),timeline=activePanel.querySelector('.timeline');if(insertAfterCard&&insertAfterCard.parentElement===timeline)timeline.insertBefore(c,insertAfterCard.nextElementSibling);else timeline.appendChild(c);addManage(c)}
+    rememberOrder(activePanel,state);document.getElementById('v19ScheduleModal').classList.remove('show');insertAfterCard=null;updateCounts();refreshMoveButtons(activePanel);if(typeof updateHomeDashboard==='function')updateHomeDashboard();
   }
-  function removeCard(card){const name=card.querySelector('.place')?.textContent.trim()||'이 일정';if(!confirm(`“${name}” 일정을 삭제할까요?`))return;const state=load(),key=card.dataset.doneKey;if(key.startsWith('custom_'))state.custom=state.custom.filter(x=>x.key!==key);else if(!state.deleted.includes(key))state.deleted.push(key);delete state.edited[key];save(state);card.remove();updateCounts()}
+  function removeCard(card){const name=card.querySelector('.place')?.textContent.trim()||'이 일정';if(!confirm(`“${name}” 일정을 삭제할까요?`))return;const panel=card.closest('.day-panel'),state=load(),key=card.dataset.doneKey;if(key.startsWith('custom_'))state.custom=state.custom.filter(x=>x.key!==key);else if(!state.deleted.includes(key))state.deleted.push(key);delete state.edited[key];card.remove();rememberOrder(panel,state);updateCounts();refreshMoveButtons(panel);if(typeof updateHomeDashboard==='function')updateHomeDashboard()}
   function updateCounts(){document.querySelectorAll('.day-panel').forEach(p=>{const n=p.querySelectorAll('.timeline article.item').length;const span=p.querySelector('.day-header>span');if(span)span.textContent=n+'개 일정'})}
-  function applyStored(){const state=load();document.querySelectorAll('#schedulePage article.item[data-done-key]').forEach(card=>{const k=card.dataset.doneKey;if(state.deleted.includes(k)){card.remove();return}const e=state.edited[k];if(e){card.querySelector('.time').textContent=e.time;card.querySelector('.place').textContent=e.place;card.querySelector('.note').textContent=e.note;card.dataset.mapQuery=e.map;const link=card.querySelector('.actions a');if(link)link.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.map||e.place)}addManage(card)});state.custom.forEach(d=>{const p=document.querySelectorAll('.day-panel')[d.panel];if(p&&!p.querySelector(`[data-done-key="${CSS.escape(d.key)}"]`)){const c=renderCard(d);p.querySelector('.timeline').appendChild(c);addManage(c)}});updateCounts()}
+  function applyStored(){const state=load();document.querySelectorAll('#schedulePage article.item[data-done-key]').forEach(card=>{const k=card.dataset.doneKey;if(state.deleted.includes(k)){card.remove();return}const e=state.edited[k];if(e){card.querySelector('.time').textContent=e.time;card.querySelector('.place').textContent=e.place;card.querySelector('.note').textContent=e.note;card.dataset.mapQuery=e.map;const link=card.querySelector('.actions a');if(link)link.href='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(e.map||e.place)}addManage(card)});state.custom.forEach(d=>{const p=document.querySelectorAll('.day-panel')[d.panel];if(p&&!p.querySelector(`[data-done-key="${CSS.escape(d.key)}"]`)){const c=renderCard(d);p.querySelector('.timeline').appendChild(c);addManage(c)}});document.querySelectorAll('.day-panel').forEach((p,i)=>{const timeline=p.querySelector('.timeline'),byKey=new Map(panelCards(p).map(c=>[c.dataset.doneKey,c]));(state.orders[i]||[]).forEach(k=>{const c=byKey.get(k);if(c)timeline.appendChild(c)});refreshMoveButtons(p)});updateCounts()}
   function init(){modal();document.querySelectorAll('.day-panel').forEach(p=>p.querySelector('.schedule-add-btn')?.addEventListener('click',()=>openEditor(p)));applyStored()}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
