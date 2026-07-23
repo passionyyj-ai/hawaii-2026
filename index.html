@@ -2330,7 +2330,13 @@ renderCategories();renderPhrases();
   async function transcribeRecording(blob,lang){
     const cfg=window.HAWAII_CONFIG||{},url=String(cfg.supabaseFunctionUrl||"").trim();if(!url)throw new Error("음성 변환 서버가 설정되지 않았습니다.");
     const audio=await blobToDataUrl(blob),response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json",...(cfg.supabaseAnonKey?{apikey:cfg.supabaseAnonKey,Authorization:"Bearer "+cfg.supabaseAnonKey}:{})},body:JSON.stringify({mode:"transcribe",audio,mimeType:blob.type||"audio/wav",language:lang})});
-    let data={};try{data=await response.json()}catch(e){}if(!response.ok)throw new Error(data.error||`음성 변환 서버 오류 (${response.status})`);const text=String(data.text||data.transcript||data.result||"").trim();if(!text)throw new Error("음성을 인식하지 못했습니다.");return text;
+    let data={};try{data=await response.json()}catch(e){}if(!response.ok)throw new Error(data.error||`음성 변환 서버 오류 (${response.status})`);let text=String(data.text||data.transcript||data.result||"").trim();if(!text)throw new Error("음성을 인식하지 못했습니다.");if(String(lang).toLowerCase().startsWith("en"))text=await normalizeEnglishTranscript(text,url,cfg);return text;
+  }
+  async function normalizeEnglishTranscript(text,url,cfg){
+    try{
+      const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json",...(cfg.supabaseAnonKey?{apikey:cfg.supabaseAnonKey,Authorization:"Bearer "+cfg.supabaseAnonKey}:{})},body:JSON.stringify({mode:"translate",text,source:"ko",target:"en",sourceLanguage:"Korean phonetic transcription of spoken English",targetLanguage:"natural English",style:"literal",context:[]})});
+      const data=await response.json();return response.ok&&data.translatedText?String(data.translatedText).trim():text;
+    }catch(e){return text}
   }
   async function stopPcmAndTranscribe(){
     if(!activePcmRecorder)return;const recorder=activePcmRecorder,target=activePcmTarget,button=activeButton,who=activePcmWho,lang=activePcmLang;activePcmRecorder=null;activePcmTarget=null;activePcmWho="";activePcmLang="";if(button){button.disabled=true;button.textContent="음성을 글자로 변환하는 중…"}target.textContent="음성을 글자로 변환하고 있습니다…";
